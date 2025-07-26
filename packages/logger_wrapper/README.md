@@ -1,0 +1,1 @@
+This package provides a convenient wrapper around the popular `logger` package, making it easier to integrate logging functionality into your Flutter applications.

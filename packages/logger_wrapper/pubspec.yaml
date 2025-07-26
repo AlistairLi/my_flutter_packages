@@ -1,0 +1,17 @@
+name: logger_wrapper
+description: A wrapper package for logging functionalities in Flutter applications.
+version: 1.0.0
+homepage: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/logger_wrapper
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/logger_wrapper
+
+environment:
+  sdk: '>=2.19.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  logger: ^2.6.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
