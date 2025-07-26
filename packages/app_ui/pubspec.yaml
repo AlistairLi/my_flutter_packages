@@ -1,0 +1,26 @@
+name: app_ui
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.6.0
+
+# Add regular dependencies here.
+dependencies:
+  flutter:
+    sdk: flutter
+  auto_size_text_plus: 3.0.2
+  extended_tabs: 5.0.0
+  # 监听widget可见性变化
+  visibility_detector: 0.4.0+2
+
+  # === 图片查看器相关依赖 start ===
+  photo_view: 0.15.0
+  carousel_slider: 5.1.1
+  dots_indicator: 4.0.1
+  # === 图片查看器相关依赖 end===
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
