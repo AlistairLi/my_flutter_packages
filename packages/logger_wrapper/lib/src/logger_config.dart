@@ -1,4 +1,4 @@
-import 'package:logger/logger.dart';
+import 'package:logger_wrapper/src/logger_level.dart';
 
 class LoggerConfig {
   LoggerConfig._();
@@ -14,5 +14,5 @@ class LoggerConfig {
   bool writeToFile = false;
 
   /// 最低日志级别（低于此级别的日志不打印）
-  Level minLogLevel = Level.debug;
+  LoggerLevel minLogLevel = LoggerLevel.debug;
 }
