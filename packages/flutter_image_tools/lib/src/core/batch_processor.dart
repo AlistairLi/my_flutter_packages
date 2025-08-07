@@ -1,15 +1,12 @@
-
-
 import '../flutter_image_tools_base.dart';
-import 'smart_compressor.dart';
+import 'border_adder.dart';
+import 'cropper.dart';
+import 'filter_applier.dart';
 import 'format_converter.dart';
 import 'resizer.dart';
 import 'rotator.dart';
-import 'cropper.dart';
-import 'watermark_adder.dart';
 import 'round_cropper.dart';
-import 'border_adder.dart';
-import 'filter_applier.dart';
+import 'smart_compressor.dart';
 
 /// 批量处理器
 class BatchProcessor {
@@ -22,7 +19,7 @@ class BatchProcessor {
     ImageProcessor processor,
   ) async {
     final results = <ImageProcessingResult>[];
-    
+
     for (final imagePath in imagePaths) {
       try {
         final result = await processor.process(imagePath, options);
@@ -34,7 +31,7 @@ class BatchProcessor {
         print('Error processing $imagePath: $e');
       }
     }
-    
+
     return results;
   }
 
@@ -78,14 +75,6 @@ class BatchProcessor {
     return processBatch(imagePaths, options, const Cropper());
   }
 
-  /// 批量添加水印
-  Future<List<ImageProcessingResult>> addWatermarkBatch(
-    List<String> imagePaths,
-    WatermarkConfig options,
-  ) async {
-    return processBatch(imagePaths, options, const WatermarkAdder());
-  }
-
   /// 批量圆角处理
   Future<List<ImageProcessingResult>> roundCornerBatch(
     List<String> imagePaths,
@@ -109,4 +98,4 @@ class BatchProcessor {
   ) async {
     return processBatch(imagePaths, options, const FilterApplier());
   }
-} 
+}

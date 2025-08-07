@@ -1,6 +1,6 @@
 name: flutter_image_tools
 description: A Flutter toolkit for image processing including format conversion, cropping, and watermarking.
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/flutter_image_tools
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/flutter_image_tools
 
