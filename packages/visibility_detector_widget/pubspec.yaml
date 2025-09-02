@@ -1,0 +1,17 @@
+name: visibility_detector_widget
+description: A Flutter widget that detects visibility changes and app lifecycle state, providing callbacks for when widgets become visible or invisible.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/visibility_detector_widget
+
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+  flutter: '>=3.7.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  visibility_detector: ^0.4.0+2
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
