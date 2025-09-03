@@ -1,0 +1,19 @@
+name: photo_gallery_viewer
+description: A powerful and customizable Flutter package for displaying photo galleries with support for carousel sliding, zooming, and various indicator styles. Perfect for image viewers, banners, and photo browsing experiences.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/photo_gallery_viewer
+
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+  flutter: '>=3.7.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  photo_view: ^0.15.0
+  carousel_slider: ^5.1.1
+  dots_indicator: ^4.0.1
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
