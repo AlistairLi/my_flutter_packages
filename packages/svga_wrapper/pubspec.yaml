@@ -1,0 +1,16 @@
+name: svga_wrapper
+description: A wrapper based on svgaplayer_3 that extends SVGASimpleImage with memory buffer support for SVGA animations.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/svga_wrapper
+
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  svgaplayer_3: ^3.0.1
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
