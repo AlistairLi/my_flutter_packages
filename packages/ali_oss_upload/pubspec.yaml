@@ -1,0 +1,16 @@
+name: ali_oss_upload
+description: A Flutter package for uploading files to Aliyun Object Storage Service (OSS) with authentication and configuration support.
+version: 0.0.1
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/ali_oss_upload
+
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.8.0+1
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0

@@ -1,0 +1,9 @@
+{
+  "accessKeyId": "xxxxx",
+  "policy": "xxxxx",
+  "signature": "xxxxx",
+  "expire": "1752960000000",
+  "dir": "20250101/",
+  "host": "https://xxx.oss-us-west-1.aliyuncs.com",
+  "callback": "xxxxx"
+}
