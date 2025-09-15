@@ -1,0 +1,15 @@
+name: flutter_navigator_helper
+description: A Flutter package that provides enhanced navigation utilities and route management helpers for easier Navigator operations.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/flutter_navigator_helper
+
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
