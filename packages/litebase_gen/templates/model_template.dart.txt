@@ -1,0 +1,23 @@
+import 'package:litebase/litebase.dart';
+
+class {{ModelName}} extends DbModel {
+  final int? id;
+  final String name;
+
+  {{ModelName}}({this.id, required this.name});
+
+  @override
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+  };
+
+  static {{ModelName}} fromMap(Map<String, dynamic> map) => {{ModelName}}(
+    id: map['id'] as int?,
+    name: map['name'] as String?,
+  );
+
+  Map<String, dynamic> toJson() => toMap();
+
+  static {{ModelName}} fromJson(Map<String, dynamic> json) => fromMap(json);
+}

@@ -1,0 +1,10 @@
+import '../model/{{fileName}}.dart';
+import 'package:litebase/litebase.dart';
+
+class {{ModelName}}Dao extends BaseDao<{{ModelName}}> {
+  @override
+  String get tableName => '{{tableName}}';
+
+  @override
+  {{ModelName}} fromMap(Map<String, dynamic> map) => {{ModelName}}.fromMap(map);
+}

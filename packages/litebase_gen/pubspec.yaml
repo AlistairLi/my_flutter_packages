@@ -1,0 +1,18 @@
+name: litebase_gen
+description: A CLI tool to generate litebase model and DAO files.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/litebase_gen
+
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+
+dependencies:
+#  litebase: ^1.0.0
+  args: ^2.3.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
+
+executables:
+  litebase_gen: litebase_gen
