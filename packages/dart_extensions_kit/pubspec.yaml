@@ -1,0 +1,16 @@
+name: dart_extensions_kit
+description: A comprehensive collection of useful extension methods for Dart and Flutter, including utilities for numbers, strings, lists, maps, dates, colors, and booleans.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/dart_extensions_kit
+
+environment:
+  sdk: '>=2.19.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  intl: ^0.19.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
