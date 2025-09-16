@@ -1,0 +1,14 @@
+name: hive_easy
+description: Make Hive easier to use.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/hive_easy
+
+environment:
+  sdk: '>=2.19.6 <4.0.0'
+
+dependencies:
+  hive_ce_flutter: ^2.3.2
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
