@@ -1,0 +1,14 @@
+name: facebook_wrapper
+description: A wrapper for the fb_sdk_flutter to simplify integration and usage in Flutter applications.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/facebook_wrapper
+
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+
+dependencies:
+  fb_sdk_flutter: ^1.0.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
