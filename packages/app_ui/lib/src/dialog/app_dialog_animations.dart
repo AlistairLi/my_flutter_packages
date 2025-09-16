@@ -7,11 +7,13 @@ Future<T?> showTopDialog<T>({
   bool barrierDismissible = true,
   Color barrierColor = Colors.black54,
   String? barrierLabel,
-  Duration transitionDuration = const Duration(milliseconds: 250),
+  Duration transitionDuration = const Duration(milliseconds: 200),
   String? routeName,
   RouteSettings? routeSettings,
   bool useRootNavigator = true,
   bool enableFade = false,
+  Curve curve = Curves.easeOutCubic,
+  Curve reverseCurve = Curves.easeOutQuart,
 }) {
   return showGeneralDialog<T>(
     context: context,
@@ -34,7 +36,13 @@ Future<T?> showTopDialog<T>({
         position: Tween<Offset>(
           begin: const Offset(0, -0.2),
           end: Offset.zero,
-        ).animate(CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic)),
+        ).animate(
+          CurvedAnimation(
+            parent: anim1,
+            curve: curve,
+            reverseCurve: reverseCurve,
+          ),
+        ),
         child: child,
       );
       if (enableFade) {
@@ -57,11 +65,12 @@ Future<T?> showBottomDialog<T>({
   bool barrierDismissible = true,
   Color barrierColor = Colors.black54,
   String? barrierLabel,
-  Duration transitionDuration = const Duration(milliseconds: 250),
+  Duration transitionDuration = const Duration(milliseconds: 200),
   String? routeName,
   RouteSettings? routeSettings,
   bool useRootNavigator = true,
   bool enableFade = false,
+  Curve curve = Curves.easeInCubic,
 }) {
   return showGeneralDialog<T>(
     context: context,
@@ -84,7 +93,7 @@ Future<T?> showBottomDialog<T>({
         position: Tween<Offset>(
           begin: const Offset(0, 0.2),
           end: Offset.zero,
-        ).animate(CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic)),
+        ).animate(CurvedAnimation(parent: anim1, curve: curve)),
         child: FadeTransition(
           opacity: anim1,
           child: child,
@@ -108,10 +117,11 @@ Future<T?> showScaleDialog<T>({
   bool barrierDismissible = true,
   Color barrierColor = Colors.black54,
   String? barrierLabel,
-  Duration transitionDuration = const Duration(milliseconds: 250),
+  Duration transitionDuration = const Duration(milliseconds: 200),
   String? routeName,
   RouteSettings? routeSettings,
   bool useRootNavigator = true,
+  Curve curve = Curves.easeIn,
 }) {
   return showGeneralDialog<T>(
     context: context,
@@ -129,7 +139,7 @@ Future<T?> showScaleDialog<T>({
     transitionBuilder: (context, anim1, anim2, child) {
       return ScaleTransition(
         scale: Tween<double>(begin: 0.85, end: 1.0).animate(
-          CurvedAnimation(parent: anim1, curve: Curves.elasticOut),
+          CurvedAnimation(parent: anim1, curve: curve),
         ),
         child: FadeTransition(
           opacity: anim1,
@@ -147,7 +157,7 @@ Future<T?> showFadeDialog<T>({
   bool barrierDismissible = true,
   Color barrierColor = Colors.black54,
   String? barrierLabel,
-  Duration transitionDuration = const Duration(milliseconds: 250),
+  Duration transitionDuration = const Duration(milliseconds: 200),
   String? routeName,
   RouteSettings? routeSettings,
   bool useRootNavigator = true,

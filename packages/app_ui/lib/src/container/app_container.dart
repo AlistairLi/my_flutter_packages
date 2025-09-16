@@ -1,5 +1,5 @@
 // packages/shared_widgets/lib/src/layout/app_container.dart
-import 'package:app_ui/shared_widgets.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 
 /// 通用容器组件

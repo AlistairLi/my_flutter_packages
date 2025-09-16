@@ -10,11 +10,7 @@ class FollowPageExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StatusPollingWidget(
-      config: StatusPollingConfig(
-        logTag: tag,
-        refreshInterval: Duration(milliseconds: 10000),
-      ),
-      visibilityKey: 'follow_list_visibility_key',
+      logTag: tag,
       onRefreshStatus: () async {
         // 模拟刷新状态
         return Future.delayed(Duration(seconds: 1));

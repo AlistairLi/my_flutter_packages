@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 /// Cupertino style 确认弹窗，但不使用 CupertinoAlertDialog，定制化程度更高
 class AppCupertinoCustomConfirmDialog extends StatelessWidget {
   final String? title;
+  final Widget? titleWidget;
   final String? content;
   final String? leftText;
   final String? rightText;
-  final void Function(BuildContext context)? onClose;
+  final void Function(BuildContext context)? onLeftClose;
+  final void Function(BuildContext context)? onRightClose;
   final VoidCallback? onLeftTap;
   final VoidCallback? onRightTap;
   final TextStyle? titleTextStyle;
@@ -27,10 +29,12 @@ class AppCupertinoCustomConfirmDialog extends StatelessWidget {
   const AppCupertinoCustomConfirmDialog({
     super.key,
     this.title,
+    this.titleWidget,
     this.content,
     this.leftText = 'Cancel',
     this.rightText = 'Confirm',
-    this.onClose,
+    this.onLeftClose,
+    this.onRightClose,
     this.onLeftTap,
     this.onRightTap,
     this.titleTextStyle,
@@ -47,7 +51,7 @@ class AppCupertinoCustomConfirmDialog extends StatelessWidget {
     this.textScaleFactor = 1,
     this.titleMaxLines = 3,
     this.contentMaxLines = 20,
-  }) : assert(title != null || content != null,
+  }) : assert(title != null || titleWidget != null || content != null,
             'The "title" and "content" cannot be used simultaneously.');
 
   @override
@@ -76,7 +80,11 @@ class AppCupertinoCustomConfirmDialog extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (title != null) ...[
+                    if (titleWidget != null) ...[
+                      titleWidget!,
+                      SizedBox(height: 12 * widthScaleFactor),
+                    ],
+                    if (titleWidget == null && title != null) ...[
                       Text(
                         title!,
                         maxLines: titleMaxLines,
@@ -119,7 +127,7 @@ class AppCupertinoCustomConfirmDialog extends StatelessWidget {
                       child: _DialogButton(
                         text: leftText ?? "",
                         onTap: () {
-                          onClose?.call(context);
+                          onLeftClose?.call(context);
                           onLeftTap?.call();
                         },
                         textStyle: leftTextStyle ??
@@ -141,7 +149,7 @@ class AppCupertinoCustomConfirmDialog extends StatelessWidget {
                       child: _DialogButton(
                         text: rightText ?? "",
                         onTap: () {
-                          onClose?.call(context);
+                          onRightClose?.call(context);
                           onRightTap?.call();
                         },
                         textStyle: rightTextStyle ??

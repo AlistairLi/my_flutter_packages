@@ -1,4 +1,4 @@
-import 'package:app_ui/shared_widgets.dart';
+import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 
 /// 底部选择弹窗

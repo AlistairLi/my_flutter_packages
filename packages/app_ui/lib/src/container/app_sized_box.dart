@@ -15,9 +15,6 @@ class AppSizedBox extends StatelessWidget {
   /// 设置宽度和高度
   const AppSizedBox.wh(this.width, this.height, {super.key, this.child});
 
-  /// 标准构造函数
-  const AppSizedBox._({super.key, this.width, this.height, this.child});
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
