@@ -1,4 +1,3 @@
-import 'package:logger_wrapper/logger_wrapper.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -41,12 +40,10 @@ class DbManager {
   /// 用户登录 - 创建/打开用户数据库
   static Future<void> userLogin(String userId) async {
     if (_userDatabases.containsKey(userId)) {
-      mLog('User database already exists: $userId', tag: 'DbManager');
       return;
     }
 
     _userDatabases[userId] = await _initUserDatabase(userId);
-    mLog('User logged in, database created: $userId', tag: 'DbManager');
   }
 
   /// 用户退出 - 关闭用户数据库
@@ -54,7 +51,6 @@ class DbManager {
     if (_userDatabases.containsKey(userId)) {
       await _userDatabases[userId]!.close();
       _userDatabases.remove(userId);
-      mLog('User logged out, database closed: $userId', tag: 'DbManager');
     }
   }
 
@@ -69,13 +65,10 @@ class DbManager {
       version: 1,
       onCreate: (db, version) async {
         for (var sql in _appTables.values) {
-          mLog('Creating app table: $sql', tag: 'DbManager');
           await db.execute(sql);
         }
       },
-      onOpen: (db) {
-        mLog('App database opened', tag: 'DbManager');
-      },
+      onOpen: (db) {},
       onUpgrade: _migration,
     );
 
@@ -113,13 +106,10 @@ class DbManager {
       version: 1,
       onCreate: (db, version) async {
         for (var sql in _userTables.values) {
-          mLog('Creating user table: $sql', tag: 'DbManager');
           await db.execute(sql);
         }
       },
-      onOpen: (db) {
-        mLog('User database opened: $userId', tag: 'DbManager');
-      },
+      onOpen: (db) {},
       onUpgrade: _migration,
     );
 
@@ -143,8 +133,6 @@ class DbManager {
       _createUserDatabaseName(userId),
     );
     await deleteDatabase(path);
-
-    mLog('User database deleted: $userId', tag: 'DbManager');
   }
 
   /// 关闭应用级别数据库
@@ -160,6 +148,5 @@ class DbManager {
       await db.close();
     }
     _userDatabases.clear();
-    mLog('All databases closed', tag: 'DbManager');
   }
 }
