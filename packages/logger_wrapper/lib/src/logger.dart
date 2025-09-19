@@ -11,7 +11,7 @@ class LoggerWrapper {
   );
 
   static void v(dynamic message) {
-    _logger.t(message, stackTrace: StackTrace.current);
+    _logger.v(message);
   }
 
   static void d(dynamic message) {
