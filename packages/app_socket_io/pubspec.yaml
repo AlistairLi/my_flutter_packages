@@ -1,8 +1,7 @@
 name: app_socket_io
 description: A Flutter Socket.IO connection management library based on socket_io_client with automatic reconnection and message queuing.
 
-version: 1.0.0
-homepage: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/app_socket_io
+version: 1.0.1
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/app_socket_io
 
 
@@ -13,7 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
   socket_io_client: 1.0.2
-  logger_wrapper: ^1.0.0
 
 dev_dependencies:
   lints: ^5.0.0

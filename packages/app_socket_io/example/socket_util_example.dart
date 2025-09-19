@@ -1,5 +1,4 @@
 import 'package:app_socket_io/app_socket_io.dart';
-import 'package:logger_wrapper/logger_wrapper.dart';
 
 /// 应用层 Socket 工具类示例
 class SocketUtilExample {
@@ -65,12 +64,12 @@ class SocketUtilExample {
 class AppSocketEventListener extends DefaultSocketEventListener {
   @override
   void onConnected(Object? data) {
-    mLog("socket onConnected", tag: "tag");
+    print("socket onConnected");
   }
 
   @override
   void onDisconnected(Object? data) {
-    mLog("socket onDisconnected", tag: "tag");
+    print("socket onDisconnected");
   }
 
   @override
@@ -78,7 +77,7 @@ class AppSocketEventListener extends DefaultSocketEventListener {
     if (data is Map<String, dynamic>) {
       SocketUtilExample._handleSocketData(data);
     } else {
-      mLogW("Socket message is not Map<String, dynamic>", tag: "tag");
+      print("Socket message is not Map<String, dynamic>");
     }
   }
 

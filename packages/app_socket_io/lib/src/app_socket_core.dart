@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:app_socket_io/src/listener/socket_event_listener.dart';
 import 'package:app_socket_io/src/socket_status.dart';
-import 'package:logger_wrapper/logger_wrapper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as client;
 
 import 'config/socket_config.dart';
 
 class AppSocketCore {
-  final String _tag = "AppSocket";
 
   /// 默认支持的传输方式
   final defaultTransports = <String>[
@@ -112,10 +111,7 @@ class AppSocketCore {
       // 创建Socket连接
       _coreSocket = client.io(link, ops);
       _observe();
-
-      mLog("Socket connecting to: $link", tag: _tag);
     } catch (e) {
-      mLogE("Socket setup error: $e", tag: _tag);
       _connectStatus = SocketStatus.error;
       _eventManager.notifyError({'error': e.toString()});
     }
@@ -129,8 +125,9 @@ class AppSocketCore {
     _retryCount = 0;
 
     _coreSocket?.dispose();
-    mLog("Socket disconnected", tag: _tag);
-
+    if (kDebugMode) {
+      print("[AppSocketCore] Socket disconnected");
+    }
     _coreSocket = null;
     _connectStatus = SocketStatus.unconnected;
   }
@@ -151,9 +148,6 @@ class AppSocketCore {
 
     if (shouldRetry) {
       _retryCount++;
-      mLog(
-          "Socket reconnect attempt: $_retryCount/${_config?.maxReconnectAttempts ?? 5}",
-          tag: _tag);
 
       _eventManager.notifyReconnectAttempt(
           _retryCount, _config?.maxReconnectAttempts ?? 5);
@@ -166,9 +160,6 @@ class AppSocketCore {
         _startReconnectTimer();
       } else {
         _isReconnecting = false;
-        mLog(
-            "Socket reconnect failed after ${_config?.maxReconnectAttempts ?? 5} attempts",
-            tag: _tag);
         _eventManager.notifyReconnectFailed();
       }
     } else {
@@ -208,17 +199,23 @@ class AppSocketCore {
           'data': data,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
         });
-        mLog("Message queued: $event (not connected)", tag: _tag);
+        if (kDebugMode) {
+          print("[AppSocketCore] Message queued: $event (not connected)");
+        }
         return false;
       }
 
       _coreSocket?.emitWithAck(event, data, ack: () {
-        mLog("Socket event sent successfully: $event", tag: _tag);
+        if (kDebugMode) {
+          print("[AppSocketCore] Socket event sent successfully: $event");
+        }
       });
 
       return true;
     } catch (e) {
-      mLogE("Socket send event error: $e", tag: _tag);
+      if (kDebugMode) {
+        print("[AppSocketCore] Socket send event error: $e");
+      }
       return false;
     }
   }
@@ -226,8 +223,6 @@ class AppSocketCore {
   /// 发送队列中的消息
   void _sendQueuedMessages() {
     if (_messageQueue.isEmpty) return;
-
-    mLog("Sending ${_messageQueue.length} queued messages", tag: _tag);
 
     final messagesToSend = List<Map<String, dynamic>>.from(_messageQueue);
     _messageQueue.clear();
@@ -251,7 +246,9 @@ class AppSocketCore {
       _retryCount = 0;
       _stopReconnectTimer();
 
-      mLog('Socket connected', tag: _tag);
+      if (kDebugMode) {
+        print('[AppSocketCore] Socket connected');
+      }
       _eventManager.notifyConnected(data);
 
       // 发送队列中的消息
@@ -260,13 +257,17 @@ class AppSocketCore {
 
     _coreSocket!.onConnecting((data) {
       _connectStatus = SocketStatus.connecting;
-      mLog('Socket connecting', tag: _tag);
+      if (kDebugMode) {
+        print('[AppSocketCore] Socket connecting');
+      }
       _eventManager.notifyConnecting(data);
     });
 
     _coreSocket!.onDisconnect((data) async {
       _connectStatus = SocketStatus.disconnect;
-      mLog('Socket disconnected', tag: _tag);
+      if (kDebugMode) {
+        print('[AppSocketCore] Socket disconnected');
+      }
       _eventManager.notifyDisconnected(data);
 
       // 自动重连
@@ -277,14 +278,18 @@ class AppSocketCore {
 
     _coreSocket!.onConnectError((data) {
       _connectStatus = SocketStatus.error;
-      mLogE('Socket connect error: $data', tag: _tag);
+      if (kDebugMode) {
+        print('[AppSocketCore] Socket connect error: $data');
+      }
       _eventManager.notifyError(data);
       _coreSocket?.disconnect();
     });
 
     _coreSocket!.onConnectTimeout((data) {
       _connectStatus = SocketStatus.timeout;
-      mLog('Socket connect timeout', tag: _tag);
+      if (kDebugMode) {
+        print('[AppSocketCore] Socket connect timeout');
+      }
       _eventManager.notifyTimeout(data);
     });
   }
@@ -307,7 +312,9 @@ class AppSocketCore {
   /// 处理收到的数据
   void _handleSocketData(String event, Object? data) {
     if (_config?.enableLogging ?? true) {
-      mLog("Socket received: $event - $data", tag: _tag);
+      if (kDebugMode) {
+        print('[AppSocketCore] Socket received: $event - $data');
+      }
     }
 
     _eventManager.notifyMessage(event, data);
