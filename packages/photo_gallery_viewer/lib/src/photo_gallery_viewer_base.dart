@@ -35,6 +35,12 @@ class PhotoGalleryViewer<T> extends StatefulWidget {
   /// 是否支持无限滑动
   final bool infiniteScroll;
 
+  /// 是否自动播放, 默认为true, 当 infiniteScroll 为 true 时才生效。
+  final bool autoPlay;
+
+  /// 自动播放间隔
+  final Duration autoPlayInterval;
+
   /// 是否支持缩放
   final bool enableZoom;
 
@@ -101,6 +107,8 @@ class PhotoGalleryViewer<T> extends StatefulWidget {
     this.height,
     this.initialIndex = 0,
     this.infiniteScroll = false,
+    this.autoPlay = true,
+    this.autoPlayInterval = const Duration(seconds: 4),
     this.enableZoom = false,
     this.onImageTap,
     this.onPageChanged,
@@ -188,6 +196,8 @@ class _PhotoGalleryViewerState<T> extends State<PhotoGalleryViewer<T>> {
       options: CarouselOptions(
         height: widget.height ?? double.infinity,
         viewportFraction: 1.0,
+        autoPlay: widget.autoPlay,
+        autoPlayInterval: widget.autoPlayInterval,
         initialPage: widget.initialIndex,
         enableInfiniteScroll: true,
         disableCenter: true,
