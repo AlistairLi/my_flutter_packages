@@ -95,6 +95,9 @@ class AppContainer extends StatelessWidget {
   final List<BoxShadow>? boxShadow;
   final Clip clipBehavior;
   final VoidCallback? onTap;
+
+  /// 是否需要点击防抖动
+  final bool debounceTap;
   final double widthScaleFactor;
 
   /// 是否自动居中文本类型的子组件
@@ -146,6 +149,7 @@ class AppContainer extends StatelessWidget {
     this.boxShadow,
     this.alignment,
     this.onTap,
+    this.debounceTap = true,
     this.widthScaleFactor = 1.0,
     this.autoCenterText = true,
   });
@@ -176,10 +180,17 @@ class AppContainer extends StatelessWidget {
     );
 
     if (onTap != null) {
-      current = AppGestureDetector(
-        onTap: onTap,
-        child: current,
-      );
+      if (debounceTap) {
+        current = DebouncedTapWidget(
+          onTap: onTap,
+          child: current,
+        );
+      } else {
+        current = AppGestureDetector(
+          onTap: onTap,
+          child: current,
+        );
+      }
     }
     return current;
   }
@@ -322,7 +333,8 @@ class AppContainer extends StatelessWidget {
     }
 
     // 如果启用了自动居中文本且 child 是文本类型，自动居中
-    if (autoCenterText && (child is Text || child is AppText || child is RichText)) {
+    if (autoCenterText &&
+        (child is Text || child is AppText || child is RichText)) {
       return Alignment.center;
     }
 

@@ -63,17 +63,11 @@ class StatusPollingWidget extends StatefulWidget {
 class _StatusPollingWidgetState extends State<StatusPollingWidget>
     with AutomaticKeepAliveClientMixin {
   Timer? _timer;
-  bool _isVisible = true;
+  bool _isVisible = false;
   bool _isScrolling = false;
 
   @override
   bool get wantKeepAlive => widget.keepAlive;
-
-  @override
-  void initState() {
-    super.initState();
-    _startTimer();
-  }
 
   @override
   void dispose() {
@@ -107,6 +101,8 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
       _executeRefresh();
       _stopTimer();
       _startTimer();
+    } else {
+      _stopTimer();
     }
   }
 
@@ -125,7 +121,7 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
         },
         onInvisible: () {
           _isVisible = false;
-          _stopTimer();
+          _updateRefreshState();
         },
       );
     }
@@ -137,11 +133,7 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
         scrollEndDelay: widget.scrollEndDelay,
         onScrollStateChanged: (isScrolling) {
           _isScrolling = isScrolling;
-          if (isScrolling) {
-            _stopTimer();
-          } else {
-            _updateRefreshState();
-          }
+          _updateRefreshState();
         },
       );
     }

@@ -69,7 +69,7 @@ class AppBottomSheet extends StatelessWidget {
     );
 
     List<Widget> labelWidgets = List.generate(labels.length, (index) {
-      return AppGestureDetector(
+      return DebouncedTapWidget(
         onTap: () {
           onClose?.call(context);
           onTap(index, labels[index]);

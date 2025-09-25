@@ -1,6 +1,6 @@
 name: smart_video_player
 description: A simple video player widget for Flutter applications with enhanced playback controls and features.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/smart_video_player
 
 environment:
@@ -14,7 +14,7 @@ dependencies:
   video_player_android: ^2.8.4
   chewie: ^1.11.3
   audio_session: ^0.2.2
-  visibility_detector_widget: ^1.0.0
+  visibility_detector_widget: ^1.0.1
 
 dev_dependencies:
   lints: ^5.0.0

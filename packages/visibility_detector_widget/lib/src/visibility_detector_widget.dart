@@ -29,7 +29,7 @@ class VisibilityDetectorWidget extends StatefulWidget {
 class _VisibilityDetectorWidgetState extends State<VisibilityDetectorWidget>
     with WidgetsBindingObserver {
   final _key = UniqueKey();
-  bool _isVisible = true;
+  bool _isVisible = false;
   bool _isInForeground = true;
 
   @override
