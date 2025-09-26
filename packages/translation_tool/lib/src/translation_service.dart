@@ -9,7 +9,7 @@ class TranslationService {
   final CacheManager _cacheManager;
   final NetworkClient _networkClient;
 
-  static const String _googleTranslateApi =
+  static const String _defaultTranslationApi =
       'https://translation.googleapis.com/language/translate/v2';
 
   TranslationService({
@@ -27,23 +27,39 @@ class TranslationService {
       return null;
     }
 
-    final requestConfig = config ?? const TranslationRequestConfig();
+    var globalConfig = TranslationConfig.globalConfig;
+    var translationApi = config?.translationApi ?? globalConfig?.translationApi;
+    var apiKey = config?.apiKey ?? globalConfig?.apiKey;
+    var targetLanguage = config?.targetLanguage ?? globalConfig?.targetLanguage;
+    var format = config?.format ?? globalConfig?.format;
 
     // 验证配置
-    if (requestConfig.effectiveApiKey == null) {
-      throw ArgumentError(
-          'The API key has not been configured. Please set the global API key or specify it in the request.');
-    }
-
-    if (requestConfig.effectiveTargetLanguage == null) {
+    if (targetLanguage == null || targetLanguage.isEmpty) {
       throw ArgumentError(
           'The target language has not been configured. Please set the global target language or specify it in the request.');
     }
 
+    if (format == null || format.isEmpty) {
+      throw ArgumentError(
+          'The format has not been configured. Please set the global format or specify it in the request.');
+    }
+    if ((apiKey == null || apiKey.isEmpty) &&
+        (translationApi == null || translationApi.isEmpty)) {
+      throw ArgumentError(
+          'The apiKey and translationApi cannot both be empty at the same time.');
+    }
+
+    var finalConfig = TranslationRequestConfig(
+      translationApi: translationApi,
+      apiKey: apiKey,
+      targetLanguage: targetLanguage,
+      format: format,
+    );
+
     // 生成缓存键（包含目标语言）
     final cacheKey = CacheKeyGenerator.generateTranslationKey(
       text,
-      requestConfig.effectiveTargetLanguage!,
+      targetLanguage,
     );
 
     // 尝试从缓存获取
@@ -53,7 +69,7 @@ class TranslationService {
     }
 
     // 缓存中没有，执行网络请求
-    final translatedText = await _performTranslation(text, requestConfig);
+    final translatedText = await _performTranslation(text, finalConfig);
 
     // 将结果存入缓存
     if (translatedText != null) {
@@ -70,18 +86,17 @@ class TranslationService {
   ) async {
     try {
       final queryParameters = <String, dynamic>{
-        'key': config.effectiveApiKey,
-        'target': config.effectiveTargetLanguage,
+        'target': config.targetLanguage,
         'q': text,
         'format': config.format,
       };
 
-      if (config.sourceLanguage != null) {
-        queryParameters['source'] = config.sourceLanguage;
+      if (config.translationApi == null || config.translationApi!.isEmpty) {
+        queryParameters['key'] = config.apiKey;
       }
 
       final response = await _networkClient.get(
-        _googleTranslateApi,
+        config.translationApi ?? _defaultTranslationApi,
         queryParameters: queryParameters,
       );
 
@@ -158,8 +173,9 @@ class TranslationService {
 
   /// 获取缓存键
   String _getCacheKey(String text, String? targetLanguage) {
-    var language =
-        targetLanguage ?? TranslationConfig.globalTargetLanguage ?? "en";
+    var language = targetLanguage ??
+        TranslationConfig.globalConfig?.targetLanguage ??
+        "en";
     final cacheKey = CacheKeyGenerator.generateTranslationKey(text, language);
     return cacheKey;
   }

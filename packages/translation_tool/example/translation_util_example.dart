@@ -24,8 +24,10 @@ class TranslationUtilExample {
   /// - When entering the home page
   /// - When switching the app language
   static void setupTranslation(String appLanguageCode) {
-    TranslationHelper.setGlobalApiKey("your_api_key_here");
-    TranslationHelper.setGlobalTargetLanguage(appLanguageCode);
+    TranslationHelper.setGlobalConfig(TranslationRequestConfig(
+      apiKey: "your_api_key_here",
+      targetLanguage: appLanguageCode,
+    ));
   }
 
   /// Translated text

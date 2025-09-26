@@ -34,14 +34,8 @@ class TranslationHelper {
     return _instance!;
   }
 
-  /// 设置全局API密钥
-  static void setGlobalApiKey(String apiKey) {
-    TranslationConfig.setGlobalApiKey(apiKey);
-  }
-
-  /// 设置全局目标语言
-  static void setGlobalTargetLanguage(String languageCode) {
-    TranslationConfig.setGlobalTargetLanguage(languageCode);
+  static void setGlobalConfig(TranslationRequestConfig config) {
+    TranslationConfig.setGlobalConfig = config;
   }
 
   /// 翻译文本（使用全局配置）

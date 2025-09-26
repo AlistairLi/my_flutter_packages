@@ -89,8 +89,10 @@ class CustomNetworkClient implements NetworkClient {
 
 void main() async {
   // 1. 设置全局配置
-  TranslationHelper.setGlobalApiKey('your_google_translate_api_key');
-  TranslationHelper.setGlobalTargetLanguage('en');
+  TranslationHelper.setGlobalConfig(TranslationRequestConfig(
+    targetLanguage: 'en',
+    apiKey: 'your_google_translate_api_key',
+  ));
 
   // 2. 初始化翻译服务
   TranslationHelper.initialize(
@@ -111,7 +113,6 @@ void main() async {
   print('\n=== 使用自定义配置翻译 ===');
   final customConfig = TranslationRequestConfig(
     targetLanguage: 'ja', // 翻译为日语
-    sourceLanguage: 'zh', // 源语言为中文
   );
 
   final result2 = await TranslationHelper.translateWithConfig(
