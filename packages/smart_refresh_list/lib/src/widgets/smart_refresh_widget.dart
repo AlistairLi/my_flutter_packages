@@ -79,7 +79,7 @@ class _SmartRefreshWidgetState<T> extends State<SmartRefreshWidget<T>> {
     try {
       final pageData = await widget.onRefresh!();
       _ctl.setPage(pageData.page, pageSize: pageData.pageSize);
-      _ctl.setData(pageData.data);
+      _ctl.setData(pageData.data ?? []);
       _ctl.finishRefresh(success: true);
     } catch (e) {
       _ctl.finishRefresh(success: false);
@@ -91,7 +91,7 @@ class _SmartRefreshWidgetState<T> extends State<SmartRefreshWidget<T>> {
     try {
       final nextPage = _ctl.currentPage + 1;
       final pageData = await widget.onLoad!(nextPage);
-      _ctl.addData(pageData.data);
+      _ctl.addData(pageData.data ?? []);
       _ctl.setPage(pageData.page, pageSize: pageData.pageSize);
       _ctl.finishLoad(success: true, noMore: !pageData.getHasMore());
     } catch (e) {

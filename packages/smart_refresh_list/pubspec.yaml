@@ -1,7 +1,6 @@
 name: smart_refresh_list
-description: This is a list refresh and pagination loading library based on "pull_to_refresh"..
-version: 1.0.0
-homepage: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/smart_refresh_list
+description: This is a list refresh and pagination loading library based on "pull_to_refresh".
+version: 1.0.1
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/smart_refresh_list
 
 environment:
@@ -10,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  pull_to_refresh:
+  pull_to_refresh: ^2.0.0
 
 dev_dependencies:
   flutter_test:

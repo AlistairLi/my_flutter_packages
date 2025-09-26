@@ -63,9 +63,6 @@ class ApiService {
       ),
     );
 
-    // 模拟分页逻辑
-    final hasMore = page < 5; // 只有5页数据
-
     return PageData(
       data: articles,
       page: page,
