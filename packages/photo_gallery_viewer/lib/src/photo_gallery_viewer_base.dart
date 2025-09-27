@@ -41,6 +41,8 @@ class PhotoGalleryViewer<T> extends StatefulWidget {
   /// 自动播放间隔
   final Duration autoPlayInterval;
 
+  final CarouselSliderController? sliderController;
+
   /// 是否支持缩放
   final bool enableZoom;
 
@@ -109,6 +111,7 @@ class PhotoGalleryViewer<T> extends StatefulWidget {
     this.infiniteScroll = false,
     this.autoPlay = true,
     this.autoPlayInterval = const Duration(seconds: 4),
+    this.sliderController,
     this.enableZoom = false,
     this.onImageTap,
     this.onPageChanged,
@@ -193,6 +196,7 @@ class _PhotoGalleryViewerState<T> extends State<PhotoGalleryViewer<T>> {
       itemBuilder: (context, index, realIndex) {
         return _buildImageItem(widget.dataList[index], index);
       },
+      carouselController: widget.sliderController,
       options: CarouselOptions(
         height: widget.height ?? double.infinity,
         viewportFraction: 1.0,

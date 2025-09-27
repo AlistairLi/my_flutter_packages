@@ -5,3 +5,7 @@
 ## 1.0.1
 
 - New automatic playback configuration
+
+## 1.0.2
+
+- Add controller parameters
