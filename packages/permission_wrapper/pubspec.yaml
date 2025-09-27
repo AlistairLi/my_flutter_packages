@@ -1,6 +1,6 @@
 name: permission_wrapper
 description: A Flutter permission management wrapper library based on permission_handler with enhanced features.
-version: 0.0.1
+version: 0.0.2
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/permission_wrapper
 
 environment:

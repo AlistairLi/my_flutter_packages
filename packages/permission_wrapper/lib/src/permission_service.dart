@@ -65,7 +65,6 @@ class PermissionManager {
     PermissionAlertCallback? onAlert,
     SdkIntProvider? sdkIntProvider,
     bool? hasAuthRecord,
-    int retryCount = 1,
   }) async {
     try {
       final permission = await _getPermission(permissionType, sdkIntProvider);
@@ -94,37 +93,29 @@ class PermissionManager {
       }
 
       // 请求权限
-      for (int i = 0; i <= retryCount; i++) {
-        status = await permission.request();
-        result = _convertStatus(status);
+      // Android 端行为:
+      // 第一次请求权限时弹出系统的请求弹窗，拒绝权限，返回denied；
+      // 第二次请求权限时仍然会弹出系统的请求弹窗，拒绝权限，返回permanentlyDenied；
+      // 后续再请求权限时，不再弹出系统的请求弹窗，直接返回permanentlyDenied。
+      status = await permission.request();
+      result = _convertStatus(status);
 
-        if (result == PermissionResult.granted ||
-            result == PermissionResult.limited) {
-          _updateHistory(permissionType, result);
-          _notifyStatusChange(permissionType, result);
-          return PermissionResultInfo(
-            permissionType: permissionType,
-            result: result,
-            isGranted: true,
-          );
-        }
-
-        // 如果是最后一次尝试，处理拒绝情况
-        if (i == retryCount) {
-          return _handlePermissionDenied(
-            permissionType,
-            result,
-            onAlert,
-            hasAuthRecord,
-          );
-        }
+      if (result == PermissionResult.granted ||
+          result == PermissionResult.limited) {
+        _updateHistory(permissionType, result);
+        _notifyStatusChange(permissionType, result);
+        return PermissionResultInfo(
+          permissionType: permissionType,
+          result: result,
+          isGranted: true,
+        );
       }
 
-      return PermissionResultInfo(
-        permissionType: permissionType,
-        result: PermissionResult.unavailable,
-        message: 'Permission request failed',
-        isGranted: false,
+      return _handlePermissionDenied(
+        permissionType,
+        result,
+        onAlert,
+        hasAuthRecord,
       );
     } catch (e) {
       return PermissionResultInfo(
@@ -144,7 +135,6 @@ class PermissionManager {
     PermissionAlertCallback? onAlert,
     SdkIntProvider? sdkIntProvider,
     bool? hasAuthRecord,
-    int retryCount = 1,
   }) async {
     final results = <PermissionResultInfo>[];
 
@@ -156,7 +146,6 @@ class PermissionManager {
         onAlert: onAlert,
         sdkIntProvider: sdkIntProvider,
         hasAuthRecord: hasAuthRecord,
-        retryCount: retryCount,
       );
       results.add(result);
     }
