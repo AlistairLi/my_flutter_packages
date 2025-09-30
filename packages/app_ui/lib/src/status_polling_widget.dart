@@ -48,7 +48,7 @@ class StatusPollingWidget extends StatefulWidget {
     required this.child,
     this.scrollController,
     this.onRefreshStatus,
-    this.refreshInterval = const Duration(milliseconds: 10000),
+    this.refreshInterval = const Duration(milliseconds: 5000),
     this.enableScrollPause = true,
     this.enableInvisibilityPause = true,
     this.scrollEndDelay = const Duration(milliseconds: 400),
