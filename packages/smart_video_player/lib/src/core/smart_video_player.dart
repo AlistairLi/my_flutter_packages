@@ -59,6 +59,13 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
   late ChewieController _chewieController;
   late SmartVideoPlayerController _localController;
 
+  /// 视频播放器状态变化监听器
+  late var videoListener = () {
+    if (mounted) {
+      _localController.setPlayingState(_videoController.value.isPlaying);
+    }
+  };
+
   /// 初始化播放器
   Future<void> _initPlayer() async {
     var path = widget.videoUrl;
@@ -71,7 +78,7 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
     }
 
     // 监听播放状态变化
-    _videoController.addListener(_onVideoPlayerStateChanged);
+    _videoController.addListener(videoListener);
 
     _chewieController = ChewieController(
       videoPlayerController: _videoController,
@@ -84,17 +91,6 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
     // 设置控制器状态
     _localController.setInitialized(true);
     _localController.setPlayingState(_videoController.value.isPlaying);
-
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  /// 监听视频播放器状态变化
-  void _onVideoPlayerStateChanged() {
-    if (mounted) {
-      _localController.setPlayingState(_videoController.value.isPlaying);
-    }
   }
 
   /// 暂停
@@ -133,12 +129,14 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
   void initState() {
     super.initState();
     _localController = widget.controller ?? SmartVideoPlayerController();
-    _initPlayer();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _initPlayer();
+    });
   }
 
   @override
   void dispose() {
-    _videoController.removeListener(_onVideoPlayerStateChanged);
+    _videoController.removeListener(videoListener);
     _videoController.dispose();
     _chewieController.dispose();
     // 只销毁本地控制器，外部控制器由调用方管理
