@@ -6,3 +6,6 @@
 
 - Upgrade the dependent libraries
 
+## 1.0.2
+
+- fix bug

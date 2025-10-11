@@ -69,7 +69,9 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
     } else {
       _videoController = VideoPlayerController.asset(path);
     }
-    await _videoController.initialize();
+
+    // 监听播放状态变化
+    _videoController.addListener(_onVideoPlayerStateChanged);
 
     _chewieController = ChewieController(
       videoPlayerController: _videoController,
@@ -82,9 +84,6 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
     // 设置控制器状态
     _localController.setInitialized(true);
     _localController.setPlayingState(_videoController.value.isPlaying);
-
-    // 监听播放状态变化
-    _videoController.addListener(_onVideoPlayerStateChanged);
 
     if (mounted) {
       setState(() {});
@@ -117,9 +116,10 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
         // 设置音频输出
         final AudioSession session = await AudioSession.instance;
         await session.configure(const AudioSessionConfiguration.music());
-
-        _videoController.play();
-        setState(() {});
+        if (mounted) {
+          _videoController.play();
+          setState(() {});
+        }
       }
     }
   }
