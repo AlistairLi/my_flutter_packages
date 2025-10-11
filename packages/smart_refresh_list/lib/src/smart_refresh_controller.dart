@@ -4,6 +4,10 @@ import 'package:smart_refresh_list/src/config/smart_refresh_config.dart';
 
 /// 刷新控制器
 class SmartRefreshController<T> {
+  bool _mounted = true;
+
+  bool get mounted => _mounted;
+
   final RefreshController _controller;
 
   /// 当前页码
@@ -189,6 +193,7 @@ class SmartRefreshController<T> {
 
   /// 释放资源
   void dispose() {
+    _mounted = false;
     _controller.dispose();
     _dataNotifier.dispose();
   }
