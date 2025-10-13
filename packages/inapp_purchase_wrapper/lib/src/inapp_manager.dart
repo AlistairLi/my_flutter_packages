@@ -40,18 +40,10 @@ class InAppManager {
         _paymentListener = paymentListener,
         _inAppStorage = inAppStorage,
         _inAppVerifier = inAppVerifier,
-        _logger = logger {
-    _listenPurchase();
-  }
+        _logger = logger;
 
-  /// 释放资源
-  void dispose() {
-    _purchaseSubscription?.cancel();
-    _purchaseSubscription = null;
-  }
-
-  /// 监听内购
-  void _listenPurchase() {
+  /// 开始监听内购
+  void startListening() {
     if (_purchaseSubscription != null) {
       _purchaseSubscription?.cancel();
     }
@@ -68,6 +60,19 @@ class InAppManager {
         'purchase_listen_onError',
         errorMsg: error.toString(),
       );
+    });
+  }
+
+  /// 停止监听内购
+  void stopListening() {
+    _purchaseSubscription?.cancel();
+    _purchaseSubscription = null;
+  }
+
+  /// 启动补单，登录成功进入首页后调用，延迟500毫秒调用。
+  void startRestorePurchases() {
+    Future.delayed(Duration(milliseconds: 500)).then((value) {
+      _restorePurchases();
     });
   }
 
@@ -157,13 +162,6 @@ class InAppManager {
       );
       return false;
     }
-  }
-
-  /// 启动补单，登录成功进入首页后调用,延迟500毫秒调用。
-  void startRestorePurchases() {
-    Future.delayed(Duration(milliseconds: 500)).then((value) {
-      _restorePurchases();
-    });
   }
 
   /// 处理购买更新

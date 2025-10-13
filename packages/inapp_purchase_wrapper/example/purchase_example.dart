@@ -18,9 +18,15 @@ void main() {
     logger: IAPLoggerExample(),
   );
 
-  // 补单, 登录应用时调用
+  // 登录后启动监听
+  inAppManager.startListening();
+
+  // 登录后启动恢复购买（补单）
   inAppManager.startRestorePurchases();
 
   // 购买
   inAppManager.startPurchase("product_id_xxx", "order_no_xxx");
+
+  // 退出时停止监听
+  inAppManager.stopListening();
 }
