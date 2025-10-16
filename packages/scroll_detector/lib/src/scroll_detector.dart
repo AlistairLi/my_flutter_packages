@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 /// 滚动监听Widget
 class ScrollDetector extends StatefulWidget {
   final Widget child;
-  final void Function(double offset)? onScrollStart;
-  final void Function(double offset)? onScrollEnd;
+  final void Function(double offset, double viewportDimension)? onScrollStart;
+  final void Function(double offset, double viewportDimension)? onScrollEnd;
   final VoidCallback? onScrollUpdate;
   final Duration scrollEndDelay;
   final ScrollController? controller;
@@ -42,7 +42,10 @@ class _ScrollDetectorState extends State<ScrollDetector> {
   void _onScroll() {
     if (!_isScrolling) {
       _isScrolling = true;
-      widget.onScrollStart?.call(_scrollController.offset);
+      widget.onScrollStart?.call(
+        _scrollController.offset,
+        _scrollController.position.viewportDimension,
+      );
     }
 
     // 重置定时器
@@ -50,7 +53,10 @@ class _ScrollDetectorState extends State<ScrollDetector> {
     _scrollTimer = Timer(widget.scrollEndDelay, () {
       if (mounted) {
         _isScrolling = false;
-        widget.onScrollEnd?.call(_scrollController.offset);
+        widget.onScrollEnd?.call(
+          _scrollController.offset,
+          _scrollController.position.viewportDimension,
+        );
       }
     });
 

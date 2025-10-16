@@ -1,6 +1,6 @@
 name: scroll_detector
 description: A Flutter package for detecting scroll events and monitoring scroll state changes with customizable callbacks and thresholds.
-version: 1.0.1
+version: 1.0.2
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/scroll_detector
 
 environment:

@@ -30,11 +30,11 @@ class _ScrollDetectorExampleState extends State<ScrollDetectorExample> {
           Expanded(
             child: ScrollDetector(
               scrollEndDelay: Duration(milliseconds: 300),
-              onScrollStart: (offset) {
-                print(offset);
+              onScrollStart: (offset, viewportDimension) {
+                print('offset: $offset, viewportDimension: $viewportDimension');
               },
-              onScrollEnd: (offset) {
-                print(offset);
+              onScrollEnd: (offset, viewportDimension) {
+                print('offset: $offset, viewportDimension: $viewportDimension');
               },
               child: ListView.builder(
                 controller: ScrollController(), // 这里会被组件内部的控制器替换
