@@ -11,3 +11,6 @@
 
 ## 1.0.3
 - Added ScrollController parameter.
+
+## 1.0.4
+- Added itemExtent parameter.

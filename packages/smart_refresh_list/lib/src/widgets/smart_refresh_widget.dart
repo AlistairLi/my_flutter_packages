@@ -75,7 +75,6 @@ class _SmartRefreshWidgetState<T> extends State<SmartRefreshWidget<T>> {
   }
 
   Future<void> _handleRefresh() async {
-    print("cvb, onRefresh");
     try {
       final pageData = await widget.onRefresh!();
       _ctl.setPage(pageData.page, pageSize: pageData.pageSize);

@@ -25,7 +25,11 @@ class SmartRefreshList<T> extends StatelessWidget {
     this.errorWidget,
     this.onError,
     this.padding,
-  });
+    this.itemExtent,
+  }) : assert(
+          separatorBuilder == null || itemExtent == null,
+          'The "separatorBuilder" and "itemExtent" cannot be used simultaneously.',
+        );
 
   final Widget Function(BuildContext context, T item, int index) itemBuilder;
   final Future<PageData<T>> Function() onRefresh;
@@ -43,6 +47,7 @@ class SmartRefreshList<T> extends StatelessWidget {
   final Widget? errorWidget;
   final Function(String? error)? onError;
   final EdgeInsetsGeometry? padding;
+  final double? itemExtent;
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +82,7 @@ class SmartRefreshList<T> extends StatelessWidget {
             padding: padding,
             itemCount: data.length,
             controller: scrollController,
+            itemExtent: itemExtent,
             itemBuilder: (context, index) => itemBuilder(
               context,
               data[index],
