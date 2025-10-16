@@ -2,6 +2,10 @@
 
 - Initial version.
 
-## 1.0.1 
+## 1.0.1
 
 - New function scroll_kits.dart.
+
+## 1.0.2
+
+- New function calculateRemainingGridRows.
