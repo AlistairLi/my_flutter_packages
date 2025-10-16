@@ -10,3 +10,4 @@ export 'src/loading_initializer.dart';
 export 'src/loading_util.dart';
 export 'src/toast_initializer.dart';
 export 'src/toast_util.dart';
+export 'src/kits/scroll_kits.dart';

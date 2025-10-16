@@ -1,6 +1,6 @@
 name: app_base_kit
 description: A collection of essential utilities and base classes for Flutter applications.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/app_base_kit
 
 environment:
