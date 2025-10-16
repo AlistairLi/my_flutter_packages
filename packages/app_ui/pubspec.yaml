@@ -1,6 +1,6 @@
 name: app_ui
 description: A collection of reusable UI components and widgets for Flutter applications.
-version: 1.0.3
+version: 1.0.4
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/app_ui
 
 environment:
@@ -12,7 +12,7 @@ dependencies:
   auto_size_text_plus: ^3.0.2
   extended_tabs: ^5.0.0
   visibility_detector_widget: ^1.0.1
-  scroll_detector: ^1.0.0
+  scroll_detector: ^1.0.1
 
 dev_dependencies:
   lints: ^5.0.0

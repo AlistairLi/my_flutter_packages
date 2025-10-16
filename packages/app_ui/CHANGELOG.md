@@ -13,3 +13,6 @@
 ## 1.0.3
 
 - Modify the default value of StatusPollingWidget
+
+## 1.0.4
+- StatusPollingWidget add onScrollEnd callback.

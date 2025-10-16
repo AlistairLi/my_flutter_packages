@@ -40,6 +40,9 @@ class StatusPollingWidget extends StatefulWidget {
   /// 刷新状态回调
   final Future<void> Function()? onRefreshStatus;
 
+  /// 滚动结束时的偏移量回调
+  final void Function(double offset)? onScrollEnd;
+
   /// 自定义日志标签
   final String? logTag;
 
@@ -53,6 +56,7 @@ class StatusPollingWidget extends StatefulWidget {
     this.enableInvisibilityPause = true,
     this.scrollEndDelay = const Duration(milliseconds: 400),
     this.keepAlive = true,
+    this.onScrollEnd,
     this.logTag,
   });
 
@@ -131,8 +135,13 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
         child: current,
         controller: widget.scrollController,
         scrollEndDelay: widget.scrollEndDelay,
-        onScrollStateChanged: (isScrolling) {
-          _isScrolling = isScrolling;
+        onScrollStart: (offset) {
+          _isScrolling = true;
+          _updateRefreshState();
+        },
+        onScrollEnd: (offset) {
+          _isScrolling = false;
+          widget.onScrollEnd?.call(offset);
           _updateRefreshState();
         },
       );
