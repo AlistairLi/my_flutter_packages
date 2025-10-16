@@ -173,9 +173,9 @@ class SmartRefreshController<T> {
   }
 
   /// 手动触发加载
-  void requestLoad() {
+  void requestLoad({bool needMove = true}) {
     // if (footerStatus != LoadStatus.noMore) {
-    _controller.requestLoading();
+    _controller.requestLoading(needMove: needMove);
     // }
   }
 
