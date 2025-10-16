@@ -21,3 +21,7 @@
 ## 1.0.5
 
 - New viewportDimension parameter callback.
+
+## 1.0.6
+
+- New parameters.

@@ -38,7 +38,7 @@ class StatusPollingWidget extends StatefulWidget {
   final ScrollController? scrollController;
 
   /// 刷新状态回调
-  final Future<void> Function()? onRefreshStatus;
+  final Future<void> Function(double scrollOffset)? onRefreshStatus;
 
   /// 滚动结束时的偏移量回调
   final void Function(double offset, double viewportDimension)? onScrollEnd;
@@ -69,6 +69,7 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
   Timer? _timer;
   bool _isVisible = false;
   bool _isScrolling = false;
+  double _scrollOffset = 0.0;
 
   @override
   bool get wantKeepAlive => widget.keepAlive;
@@ -96,7 +97,7 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
 
   /// 执行刷新
   Future<void> _executeRefresh() async {
-    widget.onRefreshStatus?.call();
+    widget.onRefreshStatus?.call(_scrollOffset);
   }
 
   /// 更新刷新状态
@@ -141,6 +142,7 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
         },
         onScrollEnd: (offset, viewportDimension) {
           _isScrolling = false;
+          _scrollOffset = offset;
           widget.onScrollEnd?.call(offset, viewportDimension);
           _updateRefreshState();
         },

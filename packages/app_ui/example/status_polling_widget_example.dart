@@ -11,7 +11,7 @@ class FollowPageExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return StatusPollingWidget(
       logTag: tag,
-      onRefreshStatus: () async {
+      onRefreshStatus: (scrollOffset) async {
         // 模拟刷新状态
         return Future.delayed(Duration(seconds: 1));
       },
