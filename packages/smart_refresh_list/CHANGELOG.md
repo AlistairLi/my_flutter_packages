@@ -8,3 +8,6 @@
 
 ## 1.0.2
 - SmartRefreshController Added mounted property.
+
+## 1.0.3
+- Added ScrollController parameter.

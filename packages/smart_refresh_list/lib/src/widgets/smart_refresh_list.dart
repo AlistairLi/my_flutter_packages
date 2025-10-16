@@ -13,6 +13,7 @@ class SmartRefreshList<T> extends StatelessWidget {
     required this.onRefresh,
     required this.onLoad,
     this.controller,
+    this.scrollController,
     this.separatorBuilder,
     this.enablePullDown = true,
     this.enablePullUp = true,
@@ -30,6 +31,7 @@ class SmartRefreshList<T> extends StatelessWidget {
   final Future<PageData<T>> Function() onRefresh;
   final Future<PageData<T>> Function(int page) onLoad;
   final SmartRefreshController<T>? controller;
+  final ScrollController? scrollController;
   final Widget Function(BuildContext context, int index)? separatorBuilder;
   final bool enablePullDown;
   final bool enablePullUp;
@@ -62,6 +64,7 @@ class SmartRefreshList<T> extends StatelessWidget {
           return ListView.separated(
             padding: padding,
             itemCount: data.length,
+            controller: scrollController,
             itemBuilder: (context, index) => itemBuilder(
               context,
               data[index],
@@ -73,6 +76,7 @@ class SmartRefreshList<T> extends StatelessWidget {
           return ListView.builder(
             padding: padding,
             itemCount: data.length,
+            controller: scrollController,
             itemBuilder: (context, index) => itemBuilder(
               context,
               data[index],

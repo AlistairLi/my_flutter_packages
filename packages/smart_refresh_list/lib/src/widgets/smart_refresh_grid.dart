@@ -13,6 +13,7 @@ class SmartRefreshGrid<T> extends StatelessWidget {
     required this.onRefresh,
     required this.onLoad,
     this.controller,
+    this.scrollController,
     this.enablePullDown = true,
     this.enablePullUp = true,
     this.physics,
@@ -36,6 +37,7 @@ class SmartRefreshGrid<T> extends StatelessWidget {
   final Future<PageData<T>> Function() onRefresh;
   final Future<PageData<T>> Function(int page) onLoad;
   final SmartRefreshController<T>? controller;
+  final ScrollController? scrollController;
   final bool enablePullDown;
   final bool enablePullUp;
   final ScrollPhysics? physics;
@@ -76,6 +78,7 @@ class SmartRefreshGrid<T> extends StatelessWidget {
           padding: padding,
           gridDelegate: gridDelegate ?? _buildGridDelegate(),
           itemCount: data.length,
+          controller: scrollController,
           itemBuilder: (context, index) => itemBuilder(
             context,
             data[index],
