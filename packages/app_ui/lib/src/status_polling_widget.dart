@@ -41,7 +41,7 @@ class StatusPollingWidget extends StatefulWidget {
   final Future<void> Function()? onRefreshStatus;
 
   /// 滚动结束时的偏移量回调
-  final void Function(double offset)? onScrollEnd;
+  final void Function(double offset, double viewportDimension)? onScrollEnd;
 
   /// 自定义日志标签
   final String? logTag;
@@ -135,13 +135,13 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
         child: current,
         controller: widget.scrollController,
         scrollEndDelay: widget.scrollEndDelay,
-        onScrollStart: (offset) {
+        onScrollStart: (offset, viewportDimension) {
           _isScrolling = true;
           _updateRefreshState();
         },
-        onScrollEnd: (offset) {
+        onScrollEnd: (offset, viewportDimension) {
           _isScrolling = false;
-          widget.onScrollEnd?.call(offset);
+          widget.onScrollEnd?.call(offset, viewportDimension);
           _updateRefreshState();
         },
       );

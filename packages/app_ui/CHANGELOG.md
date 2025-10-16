@@ -15,4 +15,9 @@
 - Modify the default value of StatusPollingWidget
 
 ## 1.0.4
+
 - StatusPollingWidget add onScrollEnd callback.
+
+## 1.0.5
+
+- New viewportDimension parameter callback.
