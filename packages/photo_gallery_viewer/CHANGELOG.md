@@ -4,8 +4,12 @@
 
 ## 1.0.1
 
-- New automatic playback configuration
+- New automatic playback configuration.
 
 ## 1.0.2
 
-- Add controller parameters
+- Add controller parameters.
+
+## 1.0.3
+
+- use FadeInImage.

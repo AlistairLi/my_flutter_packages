@@ -5,6 +5,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_gallery_viewer/src/dots_indicator_style.dart';
+import 'package:photo_gallery_viewer/src/transparent_image.dart';
 import 'package:photo_view/photo_view.dart';
 
 /// 图片查看器
@@ -99,6 +100,9 @@ class PhotoGalleryViewer<T> extends StatefulWidget {
   final Widget Function(BuildContext context, int currentIndex, int totalCount)?
       numberIndicatorBuilder;
 
+  /// 图片淡入动画的持续时间。
+  final Duration fadeInDuration;
+
   const PhotoGalleryViewer({
     super.key,
     required this.dataList,
@@ -129,6 +133,7 @@ class PhotoGalleryViewer<T> extends StatefulWidget {
     this.imageBorderRadius,
     this.dotsIndicatorBuilder,
     this.numberIndicatorBuilder,
+    this.fadeInDuration = const Duration(milliseconds: 600),
   });
 
   @override
@@ -286,17 +291,12 @@ class _PhotoGalleryViewerState<T> extends State<PhotoGalleryViewer<T>> {
 
   /// 构建不可缩放图片
   Widget _buildNormalImage(ImageProvider imageProvider, int index, T item) {
-    Widget imageWidget = Image(
+    Widget imageWidget = FadeInImage(
       image: imageProvider,
       fit: widget.fit,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return widget.placeholder ??
-            const Center(
-              child: CircularProgressIndicator(),
-            );
-      },
-      errorBuilder: (context, error, stackTrace) {
+      fadeInDuration: widget.fadeInDuration,
+      placeholder: MemoryImage(kTransparentImage),
+      placeholderErrorBuilder: (context, error, stackTrace) {
         return widget.errorWidget ??
             const Center(
               child: Icon(Icons.error, color: Colors.red),
