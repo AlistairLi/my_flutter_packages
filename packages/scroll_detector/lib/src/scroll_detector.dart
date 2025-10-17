@@ -42,10 +42,13 @@ class _ScrollDetectorState extends State<ScrollDetector> {
   void _onScroll() {
     if (!_isScrolling) {
       _isScrolling = true;
-      widget.onScrollStart?.call(
-        _scrollController.offset,
-        _scrollController.position.viewportDimension,
-      );
+      var offset = 0.0;
+      var viewportDimension = 0.0;
+      if (_scrollController.hasClients) {
+        offset = _scrollController.offset;
+        viewportDimension = _scrollController.position.viewportDimension;
+      }
+      widget.onScrollStart?.call(offset, viewportDimension);
     }
 
     // 重置定时器
@@ -53,10 +56,13 @@ class _ScrollDetectorState extends State<ScrollDetector> {
     _scrollTimer = Timer(widget.scrollEndDelay, () {
       if (mounted) {
         _isScrolling = false;
-        widget.onScrollEnd?.call(
-          _scrollController.offset,
-          _scrollController.position.viewportDimension,
-        );
+        var offset = 0.0;
+        var viewportDimension = 0.0;
+        if (_scrollController.hasClients) {
+          offset = _scrollController.offset;
+          viewportDimension = _scrollController.position.viewportDimension;
+        }
+        widget.onScrollEnd?.call(offset, viewportDimension);
       }
     });
 

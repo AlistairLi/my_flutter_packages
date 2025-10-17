@@ -10,3 +10,7 @@
 ## 1.0.2
 
 - New viewportDimension parameter callback.
+
+## 1.0.3
+
+- Added the `scrollController.hasClients` check.
