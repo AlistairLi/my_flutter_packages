@@ -25,3 +25,7 @@
 ## 1.0.6
 
 - New parameters.
+
+## 1.0.7
+
+- Upgrade the scroll_detector library.
