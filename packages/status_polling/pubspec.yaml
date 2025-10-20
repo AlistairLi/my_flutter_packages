@@ -1,6 +1,6 @@
 name: status_polling
 description: A Flutter widget that provides status polling functionality with visibility and scroll detection to optimize refresh operations.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/status_polling
 
 environment:
