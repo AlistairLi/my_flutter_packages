@@ -20,4 +20,12 @@ void registerBasicTypes() {
   registerFactory<bool>((json) => json as bool);
   registerFactory<double>((json) => json as double);
   registerFactory<String>((json) => json as String);
+  registerFactory<dynamic>((json) => json as dynamic);
+  registerFactory<List>((json) => json as List);
+  registerFactory<List<String>>((json) {
+    return (json as List).map((e) => e.toString()).toList();
+  });
+  registerFactory<Map>((json) => json as Map);
+  registerFactory<Map<String, dynamic>>(
+      (json) => (json is Map<String, dynamic>) ? json : <String, dynamic>{});
 }

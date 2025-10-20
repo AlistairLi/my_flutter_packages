@@ -1,0 +1,16 @@
+name: http_tool
+description: A network request library based on Dio, featuring functions such as request retry, logging, interceptors, and business error handling.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/http_tool
+
+environment:
+  sdk: '>=2.19.6 <4.0.0'
+
+dependencies:
+  dio: ^5.8.0+1
+  pretty_dio_logger: ^1.4.0
+  dio_smart_retry: ^7.0.1
+
+dev_dependencies:
+  lints: 4.0.0
+  test: 1.26.0

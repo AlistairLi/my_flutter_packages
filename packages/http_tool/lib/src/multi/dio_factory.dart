@@ -1,5 +1,5 @@
-import 'package:http_util/src/core/dio_client.dart';
-import 'package:http_util/src/core/network_config.dart';
+import 'package:http_tool/src/core/dio_client.dart';
+import 'package:http_tool/src/core/network_config.dart';
 
 class DioFactory {
   static final Map<String, DioClient> _clients = {};

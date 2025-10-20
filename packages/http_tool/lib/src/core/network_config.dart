@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:http_util/src/controller/request_loading_controller.dart';
+import 'package:http_tool/src/controller/request_loading_controller.dart';
 
 typedef HeaderBuilder = Map<String, String> Function();
 // typedef ResponseDataProcessor = Map<String, dynamic> Function(dynamic rawData);
@@ -36,7 +36,13 @@ class NetworkConfig {
   final dynamic Function<T>(dynamic rawData) responseWrapper2;
 
   /// 异常回调（可用于展示 toast / 记录错误）
-  final void Function(Object error, StackTrace stack)? onException;
+  final void Function(DioException error, StackTrace stack, bool isShowToast)?
+      onDioException;
+
+  /// 抛出异常时的回调
+  final void Function(
+          Object e, BaseOptions options, String? path, bool isShowToast)?
+      onException;
 
   /// 业务层的业务错误处理回调
   final void Function<R>(R response, bool isShowToast, String path)?
@@ -48,11 +54,19 @@ class NetworkConfig {
   // loading 回调
   final RequestLoadingController? loadingController;
 
+  /// 出现错误时的重试次数
+  final int retries;
+
+  /// 每次重试之间的延迟时间。
+  /// 如果 [retryDelays] 为空，则表示无延迟。
+  /// 如果 [retries] 大于 [retryDelays] 数组的长度，则将使用 [retryDelays] 数组中的最后一个元素值。
+  final List<Duration> retryDelays;
+
   const NetworkConfig({
     required this.baseUrl,
-    this.sendTimeout = const Duration(seconds: 10),
-    this.connectTimeout = const Duration(seconds: 10),
-    this.receiveTimeout = const Duration(seconds: 10),
+    this.sendTimeout = const Duration(seconds: 20),
+    this.connectTimeout = const Duration(seconds: 20),
+    this.receiveTimeout = const Duration(seconds: 20),
     this.contentType = Headers.jsonContentType,
     this.responseType = ResponseType.json,
     this.headersBuilder,
@@ -60,9 +74,16 @@ class NetworkConfig {
     // this.responseDataProcessor = defaultResponseDataProcessor,
     required this.responseWrapper,
     required this.responseWrapper2,
+    this.onDioException,
     this.onException,
     this.businessErrorHandler,
     this.excludeLogPaths = const [],
     this.loadingController,
+    this.retries = 2,
+    this.retryDelays = const [
+      Duration(milliseconds: 500),
+      Duration(milliseconds: 1000),
+      Duration(milliseconds: 1500),
+    ],
   });
 }

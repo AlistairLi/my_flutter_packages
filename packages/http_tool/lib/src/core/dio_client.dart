@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:http_util/src/core/network_config.dart';
-import 'package:http_util/src/interceptors/error_interceptor.dart';
-import 'package:http_util/src/interceptors/header_interceptor.dart';
+import 'package:dio_smart_retry/dio_smart_retry.dart';
+import 'package:http_tool/src/core/network_config.dart';
+import 'package:http_tool/src/interceptors/header_interceptor.dart';
 
 class DioClient {
   late final Dio _dio;
@@ -20,6 +20,8 @@ class DioClient {
       sendTimeout: _config.sendTimeout,
       connectTimeout: _config.connectTimeout,
       receiveTimeout: _config.receiveTimeout,
+      contentType: _config.contentType,
+      responseType: _config.responseType,
     ));
 
     if (_config.headersBuilder != null) {
@@ -49,14 +51,24 @@ class DioClient {
       // );
     }
 
-    _dio.interceptors.add(ErrorInterceptor(_config.onException));
+    _dio.interceptors.add(RetryInterceptor(
+      dio: _dio,
+      retries: _config.retries,
+      retryDelays: _config.retryDelays,
+    ));
+    // _dio.interceptors.add(ErrorInterceptor(_config.onDioException));
   }
 
   void addInterceptor(Interceptor interceptor) {
     _dio.interceptors.add(interceptor);
   }
 
-  Future<R> post<T, R>(
+  /// 将拦截器添加到最前面
+  void addInterceptorAtFirst(Interceptor interceptor) {
+    _dio.interceptors.insert(0, interceptor);
+  }
+
+  Future<R?> post<T, R>(
     String path, {
     dynamic data,
     T Function(dynamic data)? fromJsonT,
@@ -80,14 +92,19 @@ class DioClient {
           ?.call<R>(businessResponse, isShowToast, path);
 
       return businessResponse;
+    } on DioException catch (e) {
+      _config.onDioException?.call(e, e.stackTrace, isShowToast);
+    } catch (e) {
+      _config.onException?.call(e, _dio.options, path, isShowToast);
     } finally {
       if (isShowLoading) {
         _config.loadingController?.dismiss();
       }
     }
+    return null;
   }
 
-  Future<R> get<T, R>(
+  Future<R?> get<T, R>(
     String path, {
     T Function(dynamic data)? fromJsonT,
     Map<String, dynamic>? queryParameters,
@@ -110,11 +127,16 @@ class DioClient {
       _config.businessErrorHandler
           ?.call<R>(businessResponse, isShowToast, path);
       return businessResponse;
+    } on DioException catch (e) {
+      _config.onDioException?.call(e, e.stackTrace, isShowToast);
+    } catch (e) {
+      _config.onException?.call(e, _dio.options, path, isShowToast);
     } finally {
       if (isShowLoading) {
         _config.loadingController?.dismiss();
       }
     }
+    return null;
   }
 
   void cancelAllRequests() {
