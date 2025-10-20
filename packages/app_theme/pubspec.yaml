@@ -1,0 +1,17 @@
+name: app_theme
+description: A comprehensive Flutter design system package providing unified theme management, colors, text styles, spacing, and sizing utilities.
+version: 1.0.0
+repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/app_theme
+
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # 屏幕适配
+  flutter_screenutil: ^5.9.3
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
