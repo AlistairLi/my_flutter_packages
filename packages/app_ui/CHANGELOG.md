@@ -29,3 +29,7 @@
 ## 1.0.7
 
 - Upgrade the scroll_detector library.
+
+## 1.0.8
+
+- Add Features.

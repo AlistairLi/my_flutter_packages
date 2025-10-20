@@ -44,6 +44,9 @@ class MultiTabView2<T, U> extends StatefulWidget {
   /// 是否显示二级tab
   final bool Function(List<U> secondTabs)? shouldShowSecondLevel;
 
+  /// 在一级tab之前按行显示的小部件列表
+  final List<Widget>? startActions;
+
   /// 在一级tab之后按行显示的小部件列表
   final List<Widget>? actions;
 
@@ -77,6 +80,7 @@ class MultiTabView2<T, U> extends StatefulWidget {
     this.onSecondLevelSelected,
     this.firstLevelStyle,
     this.secondLevelStyle,
+    this.startActions,
     this.actions,
     this.customHeader,
     this.emptyWidget,
@@ -206,13 +210,29 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
       }),
     );
 
+    // 处理左侧操作按钮
+    var startActions = widget.startActions ?? [];
+    // 处理右侧操作按钮
     var actions = widget.actions ?? [];
-    if (actions.isNotEmpty) {
+
+    if (startActions.isNotEmpty || actions.isNotEmpty) {
+      List<Widget> rowChildren = [];
+
+      // 添加左侧操作按钮
+      if (startActions.isNotEmpty) {
+        rowChildren.addAll(startActions);
+      }
+
+      // 添加TabBar（自动扩展）
+      rowChildren.add(Expanded(child: current));
+
+      // 添加右侧操作按钮
+      if (actions.isNotEmpty) {
+        rowChildren.addAll(actions);
+      }
+
       current = Row(
-        children: [
-          Expanded(child: current),
-          ...actions,
-        ],
+        children: rowChildren,
       );
     }
 

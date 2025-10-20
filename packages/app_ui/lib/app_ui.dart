@@ -21,8 +21,6 @@ export 'src/keyboard_dismiss_gesture.dart';
 export 'src/loading/app_loading.dart';
 export 'src/placeholder/empty_widget.dart';
 export 'src/placeholder/not_found_page.dart';
-export 'src/shared_widgets_base.dart';
-export 'src/status_polling_widget.dart';
 export 'src/tab/app_multi_tab_widget.dart';
 export 'src/tab/app_multi_tab_widget2.dart';
 export 'src/text/app_text.dart';
