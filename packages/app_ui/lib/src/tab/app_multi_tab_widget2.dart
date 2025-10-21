@@ -237,7 +237,7 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
     }
 
     current = SizedBox(
-      height: 44 * widget.widthScaleFactor,
+      height: style.height * widget.widthScaleFactor,
       child: current,
     );
     return current;
@@ -291,7 +291,7 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
     final controller = _secondLevelTabControllers[firstIndex]!;
 
     return SizedBox(
-      height: 40 * widget.widthScaleFactor,
+      height: style.height * widget.widthScaleFactor,
       child: TabBar(
         controller: controller,
         tabAlignment: style.tabAlignment,
@@ -339,6 +339,7 @@ class TabStyleConfig2 {
   final bool automaticIndicatorColorAdjustment;
   final Color dividerColor;
   final TabBarIndicatorSize indicatorSize;
+  final int height;
 
   const TabStyleConfig2({
     this.isScrollable = true,
@@ -352,6 +353,7 @@ class TabStyleConfig2 {
     this.dividerColor = Colors.transparent,
     this.automaticIndicatorColorAdjustment = false,
     this.indicatorSize = TabBarIndicatorSize.tab,
+    this.height = 44,
   });
 
   /// 默认一级tab样式
@@ -369,6 +371,7 @@ class TabStyleConfig2 {
       ),
       padding: EdgeInsets.only(left: 6, right: 6),
       labelPadding: EdgeInsets.only(right: 12, left: 12),
+      height: 44,
     );
   }
 
@@ -386,6 +389,7 @@ class TabStyleConfig2 {
         fontWeight: FontWeight.w500,
       ),
       labelPadding: EdgeInsets.symmetric(horizontal: 5),
+      height: 40,
     );
   }
 }

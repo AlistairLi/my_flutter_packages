@@ -33,3 +33,7 @@
 ## 1.0.8
 
 - Add Features.
+
+## 1.0.9
+
+- Modify MultiTabView2.
