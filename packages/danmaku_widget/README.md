@@ -9,7 +9,7 @@ Add the dependency in `pubspec.yaml`:
 
 ```yaml 
 dependencies:
-  danmaku_widget: ^1.0.0
+  danmaku_widget: ^1.0.1
 ```
 
 Then run:
