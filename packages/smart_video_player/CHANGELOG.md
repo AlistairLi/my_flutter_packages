@@ -13,3 +13,8 @@
 ## 1.0.3
 
 - fix bug
+
+## 1.0.4
+
+- Add progress bar.
+- Video preloading cache.
