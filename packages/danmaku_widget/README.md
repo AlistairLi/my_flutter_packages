@@ -24,8 +24,8 @@ Please check the example.
 
 ## Screenshots
 
-![Demo Screenshot](screenshots/shortscreen1.png)
-![Demo Screenshot](screenshots/shortscreen2.png)
+![Demo Screenshot](screenshots/Screenshot_1.png)
+![Demo Screenshot](screenshots/Screenshot_1.png)
 
 ## License
 

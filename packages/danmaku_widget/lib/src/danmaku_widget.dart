@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:uuid/uuid.dart';
 
 /// 弹幕数据模型
 class DanmakuItem {
@@ -61,11 +63,17 @@ class DanmakuConfig {
   /// 弹幕最大宽度（相对于屏幕宽度的比例）
   final double maxWidthRatio;
 
-  /// 弹幕移动速度（像素/秒）
-  final double speed;
+  /// 弹幕最小移动速度（像素/秒）
+  final double minSpeed;
+
+  /// 弹幕最大移动速度（像素/秒）
+  final double maxSpeed;
 
   /// 弹幕之间的最小间距
   final double minSpacing;
+
+  /// 弹幕的行数
+  final int lineCount;
 
   const DanmakuConfig({
     // this.backgroundColor = const Color(0xCC222222),
@@ -78,8 +86,10 @@ class DanmakuConfig {
     this.lineHeight = 32.0,
     this.topOffset = 50.0,
     this.maxWidthRatio = 0.7,
-    this.speed = 50.0,
-    this.minSpacing = 20.0,
+    this.minSpeed = 40.0,
+    this.maxSpeed = 70.0,
+    this.minSpacing = 40.0,
+    this.lineCount = 3,
   });
 }
 
@@ -90,10 +100,15 @@ class DanmakuTrack {
   double? lastDanmakuEndTime;
   double? lastDanmakuWidth;
   double? lastDanmakuStartPosition; // 上一条弹幕的起始位置
+  final double speed; // 每条轨道的速度
+  final double initialDelay; // 初始延迟（秒）
+  bool isFirstUse = true; // 标记是否是第一次使用该轨道
 
   DanmakuTrack({
     required this.trackIndex,
     required this.top,
+    required this.speed,
+    this.initialDelay = 0.0,
     this.lastDanmakuEndTime,
     this.lastDanmakuWidth,
     this.lastDanmakuStartPosition,
@@ -130,9 +145,9 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     with TickerProviderStateMixin {
   late List<AnimationController> _animationControllers;
   late List<Animation<double>> _animations;
-  late List<Animation<double>> _opacityAnimations;
   late List<DanmakuTrack> _tracks;
   late double _screenWidth;
+
   // late double _screenHeight;
   late int _maxTracks;
   bool _isInitialized = false;
@@ -143,6 +158,15 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
   List<DanmakuItem> _currentDanmaku = []; // 当前显示的弹幕
   List<int> _currentDanmakuTracks = []; // 每条弹幕对应的轨道索引
   Timer? _danmakuTimer;
+
+  // 用于批量更新的标记
+  bool _needsRebuild = false;
+
+  // 缓存容器高度，避免频繁重新计算轨道位置
+  double _lastContainerHeight = 0.0;
+
+  // 弹幕宽度缓存，避免重复计算
+  final Map<String, double> _widthCache = {};
 
   @override
   void initState() {
@@ -171,13 +195,31 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     // _screenHeight = MediaQuery.of(context).size.height;
 
     // 固定4条轨道
-    _maxTracks = 4;
+    _maxTracks = widget.config.lineCount;
+
+    // 为每条轨道生成不同的速度和随机初始延迟
+    final random = Random();
+    final speedRange = widget.config.maxSpeed - widget.config.minSpeed;
+
+    // 为每条轨道生成完全随机的初始延迟
+    // 延迟范围：0 到 displayInterval * 轨道数 * 0.5
+    final maxDelayMs = (widget.displayInterval * _maxTracks * 0.5).toInt();
 
     // 初始化轨道占位符，实际位置在 build 时通过 LayoutBuilder 计算
     _tracks = List.generate(_maxTracks, (index) {
+      // 为每条轨道分配不同的速度
+      final speedOffset = random.nextInt(speedRange.toInt() + 1);
+      final trackSpeed = widget.config.minSpeed + speedOffset;
+
+      // 为每条轨道分配随机的初始延迟（秒）
+      final initialDelayMs = random.nextInt(maxDelayMs);
+      final initialDelay = initialDelayMs / 1000.0;
+
       return DanmakuTrack(
         trackIndex: index,
         top: 0.0,
+        speed: trackSpeed,
+        initialDelay: initialDelay,
       );
     });
   }
@@ -189,7 +231,7 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     final estimatedDanmakuHeight =
         widget.config.fontSize * 1.5 + widget.config.padding.vertical;
 
-    // 计算轨道间距：让4条弹幕轨道在容器中均匀分布
+    // 计算轨道间距：让每条弹幕轨道在容器中均匀分布
     final trackSpacing =
         (containerHeight - estimatedDanmakuHeight * _maxTracks) /
             (_maxTracks + 1);
@@ -208,7 +250,6 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     _currentDanmakuTracks = [];
     _animationControllers = [];
     _animations = [];
-    _opacityAnimations = [];
   }
 
   void _startDanmakuTimer() {
@@ -254,11 +295,13 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
 
     if (track != null) {
       final danmakuWidth = _estimateDanmakuWidth(danmaku);
+      // 使用该轨道特定的速度
+      final trackSpeed = track.speed;
+
       final controller = AnimationController(
         duration: Duration(
           milliseconds:
-              (((_screenWidth + danmakuWidth) / widget.config.speed) * 1000)
-                  .round(),
+              (((_screenWidth + danmakuWidth) / trackSpeed) * 1000).round(),
         ),
         vsync: this,
       );
@@ -271,38 +314,60 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
         curve: Curves.linear,
       ));
 
-      final opacityAnimation = Tween<double>(
-        begin: 1.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: Curves.linear,
-      ));
-
       _animationControllers.add(controller);
       _animations.add(animation);
-      _opacityAnimations.add(opacityAnimation);
       _currentDanmaku.add(danmaku);
       _currentDanmakuTracks.add(track.trackIndex);
 
-      // 更新轨道信息
-      _updateTrackInfo(
-          track, controller.duration!.inMilliseconds / 1000.0, danmakuWidth);
+      // 考虑初始延迟后启动动画
+      final initialDelay = track.initialDelay;
+      final hasInitialDelay = initialDelay > 0 && track.isFirstUse;
 
-      // 触发 UI 更新
-      if (mounted) {
-        setState(() {});
+      if (hasInitialDelay) {
+        track.isFirstUse = false; // 标记已使用
+      }
+
+      // 立即占用轨道，防止重复分配
+      // 如果有初始延迟，将开始时间设置为未来时间
+      final currentTime = DateTime.now().millisecondsSinceEpoch / 1000.0;
+      track.lastDanmakuEndTime =
+          currentTime + (hasInitialDelay ? initialDelay : 0);
+      track.lastDanmakuWidth = danmakuWidth;
+      track.lastDanmakuStartPosition = _screenWidth;
+
+      // 延迟触发 UI 更新，避免频繁 setState
+      if (!_needsRebuild) {
+        _needsRebuild = true;
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _needsRebuild) {
+            setState(() {
+              _needsRebuild = false;
+            });
+          }
+        });
       }
 
       // 启动动画
-      controller.forward().then((_) {
-        // 动画完成后清理
-        if (mounted) {
-          setState(() {
+      if (hasInitialDelay) {
+        // 有初始延迟，延迟启动动画
+        Future.delayed(Duration(milliseconds: (initialDelay * 1000).round()),
+            () {
+          if (mounted && controller.status != AnimationStatus.completed) {
+            controller.forward().then((_) {
+              if (mounted) {
+                _cleanupAnimation(controller);
+              }
+            });
+          }
+        });
+      } else {
+        // 立即启动动画
+        controller.forward().then((_) {
+          if (mounted) {
             _cleanupAnimation(controller);
-          });
-        }
-      });
+          }
+        });
+      }
     } else {
       // 如果没有可用轨道，延迟重试
       Future.delayed(const Duration(milliseconds: 300), () {
@@ -315,18 +380,22 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
 
   void _cleanupAnimation(AnimationController controller) {
     final index = _animationControllers.indexOf(controller);
-    if (index != -1) {
+    if (index != -1 && index < _animationControllers.length) {
+      controller.dispose();
       _animationControllers.removeAt(index);
       _animations.removeAt(index);
-      _opacityAnimations.removeAt(index);
       if (index < _currentDanmaku.length) {
         _currentDanmaku.removeAt(index);
       }
       if (index < _currentDanmakuTracks.length) {
         _currentDanmakuTracks.removeAt(index);
       }
+
+      // 清理操作需要立即触发 setState 以保持数据一致性
+      if (mounted) {
+        setState(() {});
+      }
     }
-    controller.dispose();
   }
 
   DanmakuTrack? _findAvailableTrack(DanmakuItem danmaku) {
@@ -340,14 +409,28 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
         // 如果轨道从未使用过，直接可用
         availableTracks.add(track);
       } else {
-        // 计算上一条弹幕移动的距离
+        // 计算上一条弹幕移动的距离（使用该轨道的速度）
         final timeSinceLastDanmaku =
             currentTime - (track.lastDanmakuEndTime ?? 0);
-        final distanceMoved = timeSinceLastDanmaku * widget.config.speed;
 
-        // 如果上一条弹幕已经移动了足够的距离，则可以添加新弹幕
-        if (distanceMoved >=
-            (track.lastDanmakuWidth ?? 0) + widget.config.minSpacing) {
+        // 如果时间差是负数，说明上一条弹幕还在初始延迟中，轨道不可用
+        if (timeSinceLastDanmaku < 0) {
+          continue;
+        }
+
+        final distanceMoved = timeSinceLastDanmaku * track.speed;
+
+        // 计算上一条弹幕的当前位置
+        // 上一条弹幕的left位置
+        final lastDanmakuLeft = _screenWidth - distanceMoved;
+        // 上一条弹幕的right位置
+        final lastDanmakuRight =
+            lastDanmakuLeft + (track.lastDanmakuWidth ?? 0);
+
+        // 新弹幕从屏幕右边缘(_screenWidth)进入
+        // 只有当上一条弹幕的右边缘 + 最小间距 <= 屏幕右边缘时，才不会重叠
+        // 这样保证新弹幕从右边进入时，不会与上一条弹幕重叠
+        if (lastDanmakuRight + widget.config.minSpacing <= _screenWidth) {
           availableTracks.add(track);
         }
       }
@@ -358,15 +441,15 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     }
 
     // 如果有多个可用轨道，优先选择最久未使用的轨道
-    // 对于从未使用的轨道，按索引顺序分配
+    // 对于从未使用的轨道，按初始延迟排序（延迟小的优先）
     availableTracks.sort((a, b) {
       final aTime = a.lastDanmakuEndTime ?? double.negativeInfinity;
       final bTime = b.lastDanmakuEndTime ?? double.negativeInfinity;
 
-      // 如果都是未使用的轨道，按轨道索引排序
+      // 如果都是未使用的轨道，按初始延迟排序，让延迟小的先被使用
       if (aTime == double.negativeInfinity &&
           bTime == double.negativeInfinity) {
-        return a.trackIndex.compareTo(b.trackIndex);
+        return a.initialDelay.compareTo(b.initialDelay);
       }
 
       return aTime.compareTo(bTime);
@@ -376,23 +459,31 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     return selectedTrack;
   }
 
-  void _updateTrackInfo(
-      DanmakuTrack track, double duration, double danmakuWidth) {
-    final currentTime = DateTime.now().millisecondsSinceEpoch / 1000.0;
-    track.lastDanmakuEndTime = currentTime;
-    track.lastDanmakuWidth = danmakuWidth;
-    track.lastDanmakuStartPosition = _screenWidth;
-  }
-
   double _estimateDanmakuWidth(DanmakuItem danmaku) {
+    // 使用弹幕ID作为缓存key
+    final cacheKey = danmaku.id;
+
+    // 检查缓存
+    if (_widthCache.containsKey(cacheKey)) {
+      return _widthCache[cacheKey]!;
+    }
+
     // 估算弹幕宽度（简化计算）
     final textLength = danmaku.text.length;
     final emojiLength = danmaku.hasEmoji ? 1 : 0;
     final estimatedWidth =
         (textLength + emojiLength) * widget.config.fontSize * 0.6 +
             widget.config.padding.horizontal;
-    return estimatedWidth.clamp(
-        50.0, _screenWidth * widget.config.maxWidthRatio);
+    // 移除最大宽度限制，只保留最小宽度限制
+    final width = estimatedWidth.clamp(50.0, double.infinity);
+
+    // 存入缓存（限制缓存大小，避免内存泄漏）
+    if (_widthCache.length > 100) {
+      _widthCache.clear();
+    }
+    _widthCache[cacheKey] = width;
+
+    return width;
   }
 
   @override
@@ -401,6 +492,7 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     if (oldWidget.danmakuDataSource.length != widget.danmakuDataSource.length) {
       _stopDanmakuTimer();
       _disposeAnimations();
+      _widthCache.clear(); // 清理缓存
       _initializeDanmakuPool();
       _startDanmakuTimer();
     }
@@ -417,7 +509,6 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     }
     _animationControllers.clear();
     _animations.clear();
-    _opacityAnimations.clear();
     _currentDanmaku.clear();
     _currentDanmakuTracks.clear();
   }
@@ -426,6 +517,7 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
   void dispose() {
     _stopDanmakuTimer();
     _disposeAnimations();
+    _widthCache.clear();
     super.dispose();
   }
 
@@ -438,8 +530,11 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 使用 LayoutBuilder 获取实际容器尺寸，并重新计算轨道位置
-        if (constraints.maxHeight > 0 && _tracks.isNotEmpty) {
+        // 只在容器高度变化时重新计算轨道位置
+        if (constraints.maxHeight > 0 &&
+            _tracks.isNotEmpty &&
+            constraints.maxHeight != _lastContainerHeight) {
+          _lastContainerHeight = constraints.maxHeight;
           _updateTracksWithHeight(constraints.maxHeight);
         }
 
@@ -465,36 +560,47 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
         ? _currentDanmaku[index]
         : const DanmakuItem(id: '', text: '', borderColor: Colors.white);
 
-    // 使用存储的轨道索引
+    // 使用存储的轨道索引，并验证有效性
     final trackIndex =
         index < _currentDanmakuTracks.length ? _currentDanmakuTracks[index] : 0;
+
+    // 边界检查：确保 trackIndex 在有效范围内
+    if (trackIndex < 0 || trackIndex >= _tracks.length) {
+      return const SizedBox.shrink();
+    }
+
     final track = _tracks[trackIndex];
-    final maxWidth = _screenWidth * widget.config.maxWidthRatio;
+    final trackTop = track.top;
+
+    // 捕获当前的animation和controller，避免闭包引用被索引变化影响
+    final animation = _animations[index];
+    final controller = _animationControllers[index];
 
     return AnimatedBuilder(
-      animation: _animationControllers[index],
+      key: ValueKey('danmaku_${danmaku.id}_$index'), // 使用唯一Key
+      animation: animation,
       builder: (context, child) {
+        // 检查controller状态，如果已disposed则不显示
+        if (controller.isDismissed) {
+          return const SizedBox.shrink();
+        }
+
         return Positioned(
-          left: _animations[index].value,
-          top: track.top,
-          child: AnimatedBuilder(
-            animation: _opacityAnimations[index],
-            builder: (context, child) {
-              return Opacity(
-                opacity: _opacityAnimations[index].value,
-                child: _buildDanmakuBubble(danmaku, maxWidth),
-              );
-            },
-          ),
+          left: animation.value,
+          top: trackTop,
+          child: child!,
         );
       },
+      // 使用 child 缓存弹幕气泡，避免每帧重建
+      child: RepaintBoundary(
+        child: _buildDanmakuBubble(danmaku),
+      ),
     );
   }
 
-  Widget _buildDanmakuBubble(DanmakuItem danmaku, double maxWidth) {
+  Widget _buildDanmakuBubble(DanmakuItem danmaku) {
     // 根据图片效果，使用半透明背景和渐变边框
     return Container(
-      constraints: BoxConstraints(maxWidth: maxWidth),
       padding: widget.config.padding,
       decoration: BoxDecoration(
         color: danmaku.borderColor.withValues(alpha: 0.1),
@@ -514,18 +620,15 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
                   style: TextStyle(fontSize: widget.config.fontSize),
                 ),
                 const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    danmaku.text,
-                    style: TextStyle(
-                      // color: widget.config.textColor,
-                      color: danmaku.borderColor,
-                      fontSize: widget.config.fontSize,
-                      fontWeight: widget.config.fontWeight,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+                Text(
+                  danmaku.text,
+                  style: TextStyle(
+                    // color: widget.config.textColor,
+                    color: danmaku.borderColor,
+                    fontSize: widget.config.fontSize,
+                    fontWeight: widget.config.fontWeight,
                   ),
+                  maxLines: 1,
                 ),
               ],
             )
@@ -537,7 +640,6 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
                 fontSize: widget.config.fontSize,
                 fontWeight: widget.config.fontWeight,
               ),
-              overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
     );
@@ -566,7 +668,8 @@ class DanmakuManager {
   /// 添加弹幕
   void addDanmaku(String text, {String? emoji, Color? borderColor}) {
     final danmaku = DanmakuItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      // id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: Uuid().v4(),
       text: text,
       emoji: emoji,
       hasEmoji: emoji != null,
@@ -605,7 +708,6 @@ class DanmakuStyles {
     padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
     borderRadius: 8.0,
     lineHeight: 30.0,
-    speed: 40.0,
   );
 
   static const DanmakuConfig largeStyle = DanmakuConfig(
@@ -613,7 +715,6 @@ class DanmakuStyles {
     padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
     borderRadius: 16.0,
     lineHeight: 50.0,
-    speed: 60.0,
   );
 
   static const DanmakuConfig transparentStyle = DanmakuConfig(
