@@ -121,7 +121,6 @@ class _DanmakuWidgetExampleState extends State<DanmakuWidgetExample> {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               borderRadius: 10,
               borderWidth: 1,
-              maxWidthRatio: 0.7,
             ),
           ),
         ),

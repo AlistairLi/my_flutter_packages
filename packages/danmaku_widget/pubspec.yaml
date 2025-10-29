@@ -1,6 +1,6 @@
 name: danmaku_widget
 description: A Flutter widget for displaying animated danmaku (bullet comments) with customizable styles and effects.
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/your-username/danmaku_widget
 
 environment:
@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   uuid: ^4.3.3
+  visibility_detector_widget: ^1.0.1
 
 dev_dependencies:
   lints: ^5.0.0

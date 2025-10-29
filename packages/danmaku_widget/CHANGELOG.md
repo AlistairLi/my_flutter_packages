@@ -9,3 +9,7 @@
 ## 1.0.2
 
 - New parameters added.
+
+## 1.0.3
+
+- Fixed bug.
