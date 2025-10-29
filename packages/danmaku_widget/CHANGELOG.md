@@ -13,3 +13,7 @@
 ## 1.0.3
 
 - Fixed bug.
+
+## 1.0.4
+
+- Fixed bug.

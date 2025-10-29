@@ -667,16 +667,19 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
   }
 
   Widget _buildDanmakuItem(int index) {
-    if (index >= _animationControllers.length) return const SizedBox.shrink();
+    // 严格的边界检查：确保 index 在所有相关列表的有效范围内
+    if (index >= _animationControllers.length ||
+        index >= _animations.length ||
+        index >= _currentDanmaku.length ||
+        index >= _currentDanmakuTracks.length) {
+      return const SizedBox.shrink();
+    }
 
     // 从当前显示的弹幕中获取对应的弹幕数据
-    final danmaku = index < _currentDanmaku.length
-        ? _currentDanmaku[index]
-        : const DanmakuItem(id: '', text: '', borderColor: Colors.white);
+    final danmaku = _currentDanmaku[index];
 
     // 使用存储的轨道索引，并验证有效性
-    final trackIndex =
-        index < _currentDanmakuTracks.length ? _currentDanmakuTracks[index] : 0;
+    final trackIndex = _currentDanmakuTracks[index];
 
     // 边界检查：确保 trackIndex 在有效范围内
     if (trackIndex < 0 || trackIndex >= _tracks.length) {
