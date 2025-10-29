@@ -37,3 +37,7 @@
 ## 1.0.9
 
 - Modify MultiTabView2.
+
+## 1.1.0
+
+- Modify the animation effect of the dialog.

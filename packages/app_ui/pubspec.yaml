@@ -1,7 +1,7 @@
 name: app_ui
 description: A collection of reusable UI components and widgets for Flutter applications.
-version: 1.0.9
-repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/app_ui
+version: 1.1.0
+repository: https://github.com/tree_packages/main/tree/app_ui
 
 environment:
   sdk: '>=2.19.0 <4.0.0'

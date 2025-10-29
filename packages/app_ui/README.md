@@ -8,7 +8,7 @@ Add the dependency in `pubspec.yaml`:
 
 ```yaml 
 dependencies:
-  app_ui: ^1.0.0
+  app_ui: ^1.1.0
 ```
 
 Then run:
@@ -16,10 +16,6 @@ Then run:
 ``` bash
 flutter pub get
 ```
-
-## Usage
-
-Please check the example.
 
 ## Example
 

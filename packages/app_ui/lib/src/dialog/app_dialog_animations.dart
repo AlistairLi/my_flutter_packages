@@ -113,7 +113,7 @@ Future<T?> showBottomDialog<T>({
 /// 缩放弹窗
 Future<T?> showScaleDialog<T>({
   required BuildContext context,
-  required Widget child,
+  required RoutePageBuilder builder,
   bool barrierDismissible = true,
   Color barrierColor = Colors.black54,
   String? barrierLabel,
@@ -121,7 +121,8 @@ Future<T?> showScaleDialog<T>({
   String? routeName,
   RouteSettings? routeSettings,
   bool useRootNavigator = true,
-  Curve curve = Curves.easeIn,
+  Curve curve = Curves.linear,
+  double scaleBegin = 0.0,
 }) {
   return showGeneralDialog<T>(
     context: context,
@@ -133,12 +134,10 @@ Future<T?> showScaleDialog<T>({
     routeSettings: routeSettings ??
         (routeName != null ? RouteSettings(name: routeName) : null),
     useRootNavigator: useRootNavigator,
-    pageBuilder: (context, anim1, anim2) {
-      return Center(child: child);
-    },
+    pageBuilder: builder,
     transitionBuilder: (context, anim1, anim2, child) {
       return ScaleTransition(
-        scale: Tween<double>(begin: 0.85, end: 1.0).animate(
+        scale: Tween<double>(begin: scaleBegin, end: 1.0).animate(
           CurvedAnimation(parent: anim1, curve: curve),
         ),
         child: FadeTransition(
