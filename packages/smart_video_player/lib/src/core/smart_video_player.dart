@@ -102,6 +102,7 @@ class SmartVideoProgressBarConfig {
 }
 
 /// 播放视频组件
+/// 注意：当在滑动页面中，暂不支持预加载前后缓存，后续优化
 class SmartVideoPlayer extends StatefulWidget {
   /// 视频地址
   final String videoUrl;
@@ -123,6 +124,12 @@ class SmartVideoPlayer extends StatefulWidget {
   /// 是否保持播放器状态
   final bool keepAlive;
 
+  /// 是否自动播放
+  // final bool autoPlay;
+
+  /// 是否显示 Loading
+  final bool showLoading;
+
   /// 视频播放控制器
   final SmartVideoPlayerController? controller;
 
@@ -141,6 +148,8 @@ class SmartVideoPlayer extends StatefulWidget {
     this.fit = BoxFit.contain,
     this.clickPlay = true,
     this.keepAlive = true,
+    // this.autoPlay = true,
+    this.showLoading = true,
     this.controller,
     this.volume = 1,
     this.progressBarConfig = SmartVideoProgressBarConfig.defaultConfig,
@@ -194,6 +203,7 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
     _chewieController = ChewieController(
       videoPlayerController: _videoController,
+      autoInitialize: true,
       autoPlay: true,
       looping: true,
       showControls: false,
@@ -529,7 +539,9 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
                                 ),
                               ),
                             )
-                          : const Center(child: CircularProgressIndicator()),
+                          : (widget.showLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : SizedBox.shrink()),
                 ),
                 if (widget.clickPlay)
                   Positioned.fill(

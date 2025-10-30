@@ -59,7 +59,7 @@ Add the dependency in `pubspec.yaml`:
 
 ```yaml 
 dependencies:
-  smart_video_player: ^1.0.4
+  smart_video_player: ^1.0.5
 ```
 
 Then run:

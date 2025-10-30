@@ -18,3 +18,7 @@
 
 - Add progress bar.
 - Video preloading cache.
+
+## 1.0.5
+
+- Fixed bug.
