@@ -19,24 +19,36 @@ class InAppAndroidPlatform implements IInAppPlatform {
       required PurchaseDetails purchaseDetails,
       required IInAppVerifier verifier}) async {
     var details = purchaseDetails as GooglePlayPurchaseDetails;
+    Map<String, dynamic>? orderData;
     var orderNo = details.billingClientPurchase.obfuscatedAccountId;
-    if (orderNo == null || orderNo.isEmpty) {
+    var purchaseID = details.purchaseID;
+    if (orderNo != null && orderNo.isNotEmpty) {
+      orderData = await storage.getOrderData(orderNo);
+    } else if (purchaseID != null && purchaseID.isNotEmpty) {
+      orderData = await storage.getOrderDataFromPurId(purchaseID);
+    } else {
       return VerifyResult.invalid(
           errorMsg:
-              "orderNo is empty, because obfuscatedAccountId is empty on GP.");
+              "orderNo and purchaseID is empty on verifyPurchase() on GP.");
     }
 
-    var orderData = await storage.getOrderData(orderNo);
+    if ((orderData == null || orderData.isEmpty) &&
+        (orderNo == null || orderNo.isEmpty)) {
+      return VerifyResult.invalid(
+          errorMsg:
+              "orderData and orderNo is empty on verifyPurchase() on GP.");
+    }
 
     var orderModel = GooglePlayOrderModel.fromJson(orderData ?? {});
-    if (orderData == null || orderData.isEmpty) {
+    if ((orderData == null || orderData.isEmpty) &&
+        (orderNo != null && orderNo.isNotEmpty)) {
       orderModel.orderNo = orderNo;
     }
     orderModel.purchaseID = details.purchaseID;
     orderModel.originalJson = details.billingClientPurchase.originalJson;
     orderModel.signature = details.billingClientPurchase.signature;
 
-    await storage.updateOrderData(orderNo, orderModel.toJson());
+    await storage.updateOrderData(orderModel.orderNo, orderModel.toJson());
 
     return verifier.verify(orderModel);
   }

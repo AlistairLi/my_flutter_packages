@@ -8,6 +8,12 @@ class InAppStorageImplExample extends IInAppStorage {
   }
 
   @override
+  Future<Map<String, dynamic>?> getOrderDataFromPurId(String purchaseID) {
+    // TODO: implement getOrderDataFromPurId
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> removeOrder(String orderNo) {
     // TODO: implement removeOrder
     throw UnimplementedError();
@@ -24,5 +30,4 @@ class InAppStorageImplExample extends IInAppStorage {
     // TODO: implement updateOrderData
     throw UnimplementedError();
   }
-
 }

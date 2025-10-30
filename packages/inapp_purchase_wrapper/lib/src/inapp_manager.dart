@@ -232,15 +232,24 @@ class InAppManager {
   }
 
   void _deliverProduct(IapOrderModel orderModel) {
-    _inAppStorage.removeOrder(orderModel.orderNo);
-    _onSuccess(orderModel);
+    try {
+      _inAppStorage.removeOrder(orderModel.orderNo);
+      _onSuccess(orderModel);
+    } catch (e) {
+      _log(
+        'deliver_product_catch',
+        productId: orderModel.productId,
+        errorCode: "-1",
+        errorMsg: e.toString(),
+      );
+    }
   }
 
   void _handleInvalidPurchase(
       PurchaseDetails purchaseDetails, VerifyResult result) {
     _onError(
       source: "verifyPurchaseFailed",
-      errorCode: "-3",
+      errorCode: result.errorCode,
       errorMsg: result.errorMsg,
       details: purchaseDetails,
     );

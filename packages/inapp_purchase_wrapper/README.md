@@ -22,7 +22,7 @@ Add the dependency in `pubspec.yaml`:
 
 ```yaml 
 dependencies:
-  inapp_purchase_wrapper: ^1.0.0
+  inapp_purchase_wrapper: ^1.0.2
 ```
 
 Then run:
@@ -34,10 +34,6 @@ flutter pub get
 ## Usage
 
 Please check the example.
-
-## Example
-
-See the example directory for a complete sample app.
 
 ## License
 

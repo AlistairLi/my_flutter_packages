@@ -2,7 +2,10 @@
 
 - Initial version.
 
-
 ## 1.0.1
 
-- Optimize in-app purchase monitoring
+- Optimize in-app purchase monitoring.
+
+## 1.0.2
+
+- Fixed bug.
