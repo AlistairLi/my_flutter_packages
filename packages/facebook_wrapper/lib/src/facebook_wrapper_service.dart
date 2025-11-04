@@ -17,11 +17,13 @@ class FacebookWrapperService {
 
   Future<void> initialize() async {
     if (_fb != null) return;
-    _fb = FacebookSDK();
     var serId = await _config.serverId ?? "";
     var serToken = await _config.serverToken ?? "";
     String finalId = serId.isEmpty ? _config.defaultId : serId;
     String finalToken = serToken.isEmpty ? _config.defaultToken : serToken;
+    if (finalId.isEmpty || finalToken.isEmpty) return;
+
+    _fb = FacebookSDK();
     _fb!.sdkInit(applicationId: finalId, clientToken: finalToken);
   }
 
