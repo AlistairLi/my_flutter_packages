@@ -41,3 +41,7 @@
 ## 1.1.0
 
 - Modify the animation effect of the dialog.
+
+## 1.1.1
+
+- Newly added BottomConfirmDialog.

@@ -14,6 +14,7 @@ export 'src/dialog/app_cupertino_action_sheet.dart';
 export 'src/dialog/app_cupertino_confirm_dialog.dart';
 export 'src/dialog/app_cupertino_custom_confirm_dialog.dart';
 export 'src/dialog/app_dialog_animations.dart';
+export 'src/dialog/bottom_confirm_dialog.dart';
 export 'src/dialog/paged_selection_dialog.dart';
 export 'src/draggable_widget.dart';
 export 'src/input/app_text_field.dart';
