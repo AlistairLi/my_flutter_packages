@@ -45,3 +45,7 @@
 ## 1.1.1
 
 - Newly added BottomConfirmDialog.
+
+## 1.1.2
+
+- Optimize AppBottomSheet.

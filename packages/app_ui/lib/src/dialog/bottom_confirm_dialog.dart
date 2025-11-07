@@ -21,7 +21,7 @@ class BottomConfirmDialog extends StatelessWidget {
   final Color? rightBorderColor;
   final Color? backgroundColor;
   final Color? dividerColor;
-  final double borderRadius;
+  final BorderRadius? borderRadius;
   final Border? border;
   final double? buttonRadius;
   final double? buttonHeight;
@@ -53,7 +53,7 @@ class BottomConfirmDialog extends StatelessWidget {
     this.rightBorderColor,
     this.backgroundColor,
     this.dividerColor,
-    this.borderRadius = 16.0,
+    this.borderRadius,
     this.border,
     this.buttonRadius,
     this.buttonHeight,
@@ -76,7 +76,7 @@ class BottomConfirmDialog extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           color: backgroundColor ?? Colors.white,
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: borderRadius,
           border: border,
         ),
         child: Column(

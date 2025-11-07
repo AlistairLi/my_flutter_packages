@@ -1,10 +1,43 @@
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 
+/// 底部选择弹窗列表项的配置类
+class AppBottomSheetItemConfig {
+  /// 列表项背景色
+  final Color? itemBackgroundColor;
+
+  /// 列表项边框
+  final Border? itemBorder;
+
+  /// 列表项圆角
+  final BorderRadius? itemBorderRadius;
+
+  /// 列表项字体样式
+  final TextStyle? itemTextStyle;
+
+  /// 列表项宽度
+  final double? itemWidth;
+
+  /// 列表项高度
+  final double? itemHeight;
+
+  /// 列表项内边距
+  final EdgeInsetsGeometry? itemPadding;
+
+  const AppBottomSheetItemConfig({
+    this.itemBackgroundColor = Colors.transparent,
+    this.itemBorder,
+    this.itemBorderRadius,
+    this.itemTextStyle,
+    this.itemWidth,
+    this.itemHeight,
+    this.itemPadding,
+  });
+}
+
 /// 底部选择弹窗
 class AppBottomSheet extends StatelessWidget {
   final List<String> labels;
-  final TextStyle? labelTextStyle;
   final void Function(int index, String label) onTap;
   final String? cancelText;
   final TextStyle? cancelTextStyle;
@@ -12,7 +45,14 @@ class AppBottomSheet extends StatelessWidget {
   /// 背景色
   final Color? backgroundColor;
 
-  final double? topRadius;
+  /// 边框
+  final Border? border;
+
+  /// 圆角
+  final BorderRadius? borderRadius;
+
+  /// 弹窗内边距
+  final EdgeInsetsGeometry? padding;
 
   /// 是否显示取消按钮
   final bool pickCancel;
@@ -34,13 +74,15 @@ class AppBottomSheet extends StatelessWidget {
   final ValueChanged<BuildContext>? onClose;
   final ValueChanged<BuildContext>? onCancel;
 
+  /// 列表项配置
+  final AppBottomSheetItemConfig? itemConfig;
+
   const AppBottomSheet({
     super.key,
     required this.labels,
     required this.onTap,
     required this.widthScaleFactor,
     required this.textScaleFactor,
-    this.labelTextStyle,
     this.cancelText,
     this.cancelTextStyle,
     this.pickCancel = true,
@@ -49,17 +91,18 @@ class AppBottomSheet extends StatelessWidget {
     this.dividerPaddingHorizontal,
     this.cancelDivider,
     this.backgroundColor,
-    this.topRadius,
+    this.border,
+    this.borderRadius,
+    this.padding,
     this.onClose,
     this.onCancel,
+    this.itemConfig,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     List<Widget> listWidget = [];
-    listWidget.add(sizedBoxHeight(10 * widthScaleFactor));
-
     var divider = Divider(
       height: dividerHeight ?? 0.5 * textScaleFactor,
       thickness: dividerHeight ?? 0.5 * textScaleFactor,
@@ -77,14 +120,21 @@ class AppBottomSheet extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              height: 56 * widthScaleFactor,
+              width: itemConfig?.itemWidth ?? double.infinity,
+              height: itemConfig?.itemHeight ?? 54 * widthScaleFactor,
               alignment: Alignment.center,
+              padding: itemConfig?.itemPadding,
+              decoration: BoxDecoration(
+                color: itemConfig?.itemBackgroundColor,
+                border: itemConfig?.itemBorder,
+                borderRadius: itemConfig?.itemBorderRadius,
+              ),
               child: AppText(
                 labels[index],
                 maxLines: 2,
                 textAlign: TextAlign.center,
                 paddingHorizontal: 25 * widthScaleFactor,
-                style: labelTextStyle ??
+                style: itemConfig?.itemTextStyle ??
                     theme.textTheme.titleMedium?.copyWith(
                       color: Colors.black87,
                       fontSize: 16 * textScaleFactor,
@@ -125,22 +175,14 @@ class AppBottomSheet extends StatelessWidget {
       );
     }
 
-    listWidget.add(
-      sizedBoxHeight(MediaQuery.of(context).padding.bottom),
-    );
+    listWidget.add(sizedBoxHeight(MediaQuery.of(context).padding.bottom));
 
-    return Material(
-      color: backgroundColor ?? Colors.white,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusDirectional.only(
-          topStart: Radius.circular(
-            topRadius ?? (12 * widthScaleFactor),
-          ),
-          topEnd: Radius.circular(
-            topRadius ?? (12 * widthScaleFactor),
-          ),
-        ),
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Colors.white,
+        borderRadius: borderRadius,
+        border: border,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
