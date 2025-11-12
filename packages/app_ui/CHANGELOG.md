@@ -49,3 +49,7 @@
 ## 1.1.2
 
 - Optimize AppBottomSheet.
+
+## 1.1.3
+
+- New properties added to AppText.

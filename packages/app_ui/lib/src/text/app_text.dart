@@ -76,6 +76,9 @@ class AppText extends StatelessWidget {
   /// 如果设置为 FlexFit.tight，在Column中，会撑高
   final FlexFit? fit;
 
+  /// 文本方向
+  final TextDirection? textDirection;
+
   const AppText(
     this.text, {
     super.key,
@@ -113,6 +116,7 @@ class AppText extends StatelessWidget {
     this.paddingEnd,
     this.flex,
     this.fit,
+    this.textDirection,
   });
 
   @override
@@ -128,6 +132,7 @@ class AppText extends StatelessWidget {
             maxLines: maxLines,
             overflow: overflow,
             softWrap: softWrap,
+            textDirection: textDirection,
           )
         : Text(
             text,
@@ -136,6 +141,7 @@ class AppText extends StatelessWidget {
             maxLines: maxLines,
             overflow: overflow,
             softWrap: softWrap,
+            textDirection: textDirection,
           );
 
     if (onTap != null) {
