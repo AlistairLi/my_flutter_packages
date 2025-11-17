@@ -31,6 +31,9 @@ class FlashGalleryWidget extends StatelessWidget {
   /// 圆角
   final double radius;
 
+  /// 图片填充方式
+  final BoxFit? fit;
+
   const FlashGalleryWidget({
     super.key,
     this.assets,
@@ -42,6 +45,7 @@ class FlashGalleryWidget extends StatelessWidget {
     this.radius = 180,
     this.borderColor = Colors.lightBlue,
     this.borderWidth = 2,
+    this.fit = BoxFit.cover,
   }) : assert(assets != null || memoryImages != null,
             "assets or memoryImages must not be null");
 
@@ -78,7 +82,7 @@ class FlashGalleryWidget extends StatelessWidget {
         if (assets != null) {
           widget = Image.asset(
             assets![index],
-            fit: BoxFit.cover,
+            fit: fit,
             errorBuilder: (context, error, stackTrace) {
               return errorPlaceholder;
             },
@@ -86,13 +90,15 @@ class FlashGalleryWidget extends StatelessWidget {
         } else if (memoryImages != null) {
           widget = Image.memory(
             memoryImages![index],
-            fit: BoxFit.cover,
+            fit: fit,
             errorBuilder: (context, error, stackTrace) {
               return errorPlaceholder;
             },
           );
         }
 
+        final double childRadius =
+            (radius - borderWidth).clamp(0, double.infinity);
         return Center(
           child: Container(
             width: width,
@@ -105,7 +111,7 @@ class FlashGalleryWidget extends StatelessWidget {
               ),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: BorderRadius.circular(childRadius),
               child: widget,
             ),
           ),

@@ -1,7 +1,7 @@
 name: flash_gallery
 description: A simple image carousel component library that supports auto-play, border and rounded corner effects.
-version: 1.0.1
-repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/flash_gallery
+version: 1.0.2
+repository: https://github.com/jack/flash_gallery
 
 environment:
   sdk: '>=2.19.0 <4.0.0'
