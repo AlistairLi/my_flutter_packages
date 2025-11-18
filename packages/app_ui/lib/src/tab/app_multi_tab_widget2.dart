@@ -50,6 +50,12 @@ class MultiTabView2<T, U> extends StatefulWidget {
   /// 在一级tab之后按行显示的小部件列表
   final List<Widget>? actions;
 
+  /// 在二级tab之前按行显示的小部件列表
+  final List<Widget>? secondStartActions;
+
+  /// 在二级tab之后按行显示的小部件列表
+  final List<Widget>? secondActions;
+
   /// 自定义头部组件
   final Widget? customHeader;
 
@@ -82,6 +88,8 @@ class MultiTabView2<T, U> extends StatefulWidget {
     this.secondLevelStyle,
     this.startActions,
     this.actions,
+    this.secondStartActions,
+    this.secondActions,
     this.customHeader,
     this.emptyWidget,
     this.initialFirstIndex = 0,
@@ -290,39 +298,68 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
         widget.secondLevelStyle ?? TabStyleConfig2.defaultSecondLevel();
     final controller = _secondLevelTabControllers[firstIndex]!;
 
-    return SizedBox(
-      height: style.height * widget.widthScaleFactor,
-      child: TabBar(
-        controller: controller,
-        tabAlignment: style.tabAlignment,
-        isScrollable: style.isScrollable,
-        labelStyle: style.labelStyle,
-        unselectedLabelStyle: style.unselectedLabelStyle,
-        indicator: style.indicator,
-        overlayColor: WidgetStateProperty.resolveWith((states) {
-          return Colors.transparent;
-        }),
-        padding: style.padding,
-        labelPadding: style.labelPadding,
-        automaticIndicatorColorAdjustment:
-            style.automaticIndicatorColorAdjustment,
-        dividerColor: style.dividerColor,
-        indicatorSize: style.indicatorSize,
-        tabs: List.generate(secondTabs.length, (index) {
-          final tab = secondTabs[index];
-          final title = widget.secondLevelTitleExtractor(tab);
-          Widget current = Text(title);
-          // if (style.unselectedIndicator != null) {
-          //   current = Container(
-          //     decoration: style.unselectedIndicator,
-          //     padding: style.labelPadding,
-          //     child: Text(title),
-          //   );
-          // }
-          return current;
-        }),
-      ),
+    Widget current = TabBar(
+      controller: controller,
+      tabAlignment: style.tabAlignment,
+      isScrollable: style.isScrollable,
+      labelStyle: style.labelStyle,
+      unselectedLabelStyle: style.unselectedLabelStyle,
+      indicator: style.indicator,
+      overlayColor: WidgetStateProperty.resolveWith((states) {
+        return Colors.transparent;
+      }),
+      padding: style.padding,
+      labelPadding: style.labelPadding,
+      automaticIndicatorColorAdjustment:
+          style.automaticIndicatorColorAdjustment,
+      dividerColor: style.dividerColor,
+      indicatorSize: style.indicatorSize,
+      tabs: List.generate(secondTabs.length, (index) {
+        final tab = secondTabs[index];
+        final title = widget.secondLevelTitleExtractor(tab);
+        Widget current = Text(title);
+        // if (style.unselectedIndicator != null) {
+        //   current = Container(
+        //     decoration: style.unselectedIndicator,
+        //     padding: style.labelPadding,
+        //     child: Text(title),
+        //   );
+        // }
+        return current;
+      }),
     );
+
+    // 处理左侧操作按钮
+    var startActions = widget.secondStartActions ?? [];
+    // 处理右侧操作按钮
+    var actions = widget.secondActions ?? [];
+
+    if (startActions.isNotEmpty || actions.isNotEmpty) {
+      List<Widget> rowChildren = [];
+
+      // 添加左侧操作按钮
+      if (startActions.isNotEmpty) {
+        rowChildren.addAll(startActions);
+      }
+
+      // 添加TabBar（自动扩展）
+      rowChildren.add(Expanded(child: current));
+
+      // 添加右侧操作按钮
+      if (actions.isNotEmpty) {
+        rowChildren.addAll(actions);
+      }
+
+      current = Row(
+        children: rowChildren,
+      );
+    }
+
+    current = SizedBox(
+      height: style.height * widget.widthScaleFactor,
+      child: current,
+    );
+    return current;
   }
 }
 

@@ -53,3 +53,7 @@
 ## 1.1.3
 
 - New properties added to AppText.
+
+## 1.1.4
+
+- Optimize MultiTabView2.
