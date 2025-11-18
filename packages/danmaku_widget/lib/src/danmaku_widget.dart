@@ -14,13 +14,21 @@ class DanmakuItem {
   /// 弹幕文本内容
   final String text;
 
+  /// 弹幕文本颜色
+  final Color textColor;
+
   /// 边框颜色
   final Color borderColor;
+
+  /// 弹幕背景颜色
+  final Color backgroundColor;
 
   const DanmakuItem({
     required this.id,
     required this.text,
+    required this.textColor,
     required this.borderColor,
+    required this.backgroundColor,
   });
 }
 
@@ -717,19 +725,18 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
     return Container(
       padding: widget.config.padding,
       decoration: BoxDecoration(
-        color: danmaku.borderColor.withValues(alpha: 0.1),
+        color: danmaku.backgroundColor,
         borderRadius: BorderRadius.circular(widget.config.borderRadius),
         // 使用渐变边框效果
         border: Border.all(
-          color: danmaku.borderColor.withValues(alpha: 0.6),
+          color: danmaku.borderColor,
           width: widget.config.borderWidth,
         ),
       ),
       child: Text(
         danmaku.text,
         style: TextStyle(
-          // color: widget.config.textColor,
-          color: danmaku.borderColor,
+          color: danmaku.textColor,
           fontSize: widget.config.fontSize,
           fontWeight: widget.config.fontWeight,
         ),
@@ -759,13 +766,20 @@ class DanmakuManager {
   ];
 
   /// 添加弹幕
-  void addDanmaku(String text, {Color? borderColor}) {
+  void addDanmaku(
+    String text, {
+    Color? textColor,
+    Color? borderColor,
+    Color? backgroundColor,
+  }) {
     final danmaku = DanmakuItem(
       // id: DateTime.now().millisecondsSinceEpoch.toString(),
       id: Uuid().v4(),
       text: text,
+      textColor: textColor ?? Colors.white,
       borderColor: borderColor ??
           _borderColors[_danmakuList.length % _borderColors.length],
+      backgroundColor: backgroundColor ?? Colors.black12,
     );
 
     _danmakuList.add(danmaku);
