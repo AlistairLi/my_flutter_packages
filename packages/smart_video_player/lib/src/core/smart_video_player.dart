@@ -219,7 +219,7 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
   /// 暂停
   void _pause({bool isManual = false}) {
-    if (mounted) {
+    if (mounted && _isInit) {
       if (_videoController.value.isInitialized == true &&
           _videoController.value.isPlaying == true) {
         _videoController.pause();
@@ -231,7 +231,7 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
   /// 播放
   void _play({bool isManual = false}) async {
-    if (mounted) {
+    if (mounted && _isInit) {
       if (_videoController.value.isInitialized == true &&
           _videoController.value.isPlaying == false) {
         // 设置音频输出
@@ -247,9 +247,11 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
   /// 点击屏幕
   void _onTap() {
-    _videoController.value.isPlaying == true
-        ? _pause(isManual: true)
-        : _play(isManual: true);
+    if (_isInit) {
+      _videoController.value.isPlaying == true
+          ? _pause(isManual: true)
+          : _play(isManual: true);
+    }
   }
 
   double _computeProgressH(double configH, bool isDragging) {
@@ -430,6 +432,8 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
   /// 跳转到指定位置
   void _seekToPosition(Offset localPosition) {
+    if (!_isInit) return;
+
     if (!_videoController.value.isInitialized ||
         _progressController.duration.inMilliseconds == 0 ||
         initTouchPosition == null ||
@@ -468,7 +472,9 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
   void _onSeekEnd() {
     var position = _progressController.position;
-    _videoController.seekTo(position);
+    if (_isInit) {
+      _videoController.seekTo(position);
+    }
     _play();
   }
 
@@ -483,9 +489,11 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
   @override
   void dispose() {
-    _videoController.removeListener(videoListener);
-    _videoController.dispose();
-    _chewieController.dispose();
+    if (_isInit) {
+      _videoController.removeListener(videoListener);
+      _videoController.dispose();
+      _chewieController.dispose();
+    }
     // 只销毁本地控制器，外部控制器由调用方管理
     if (widget.controller == null) {
       _localController.dispose();
