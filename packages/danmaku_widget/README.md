@@ -25,7 +25,7 @@ Please check the example.
 ## Screenshots
 
 ![Demo Screenshot](screenshots/Screenshot_1.png)
-![Demo Screenshot](screenshots/Screenshot_1.png)
+![Demo Screenshot](screenshots/Screenshot_2.png)
 
 ## License
 
