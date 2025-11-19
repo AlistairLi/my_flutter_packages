@@ -114,22 +114,6 @@ class AppDeviceInfoService {
         isPhysicalDevice: _iosDeviceInfo?.isPhysicalDevice ?? false,
         identifier: identifier,
       );
-
-      // 获取iOS idfa
-      if (Platform.isIOS) {
-        // try{
-        //   if (await AppTrackingTransparency.trackingAuthorizationStatus ==
-        //       TrackingStatus.notDetermined) {
-        //   }
-        //   // 获取iOS设备广告标识符
-        //   await AppTrackingTransparency.requestTrackingAuthorization();
-        //   // 获取IDFA
-        //   await AppTrackingTransparency.getAdvertisingIdentifier();
-        // }
-        // catch(e){
-        //   debugPrint("get ios idfa error：$e");
-        // }
-      }
     }
   }
 }

@@ -11,8 +11,7 @@ publish_to: none
 dependencies:
   package_info_plus: ^8.3.0
   device_info_plus:
-    git:
-      url: https://github.com/AlistairLi/device_info_plus.git
+    path: ../device_info_plus
   flutter_udid: ^4.0.0
   flutter_secure_storage: ^9.2.4
 
