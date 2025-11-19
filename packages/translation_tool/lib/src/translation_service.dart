@@ -1,6 +1,7 @@
 import 'package:translation_tool/src/go_translation_result_model.dart';
 
 import 'cache_manager.dart';
+import 'log.dart';
 import 'network_client.dart';
 import 'translation_config.dart';
 
@@ -102,7 +103,7 @@ class TranslationService {
 
       return _parseTranslationResponse(response);
     } catch (e) {
-      print('[TranslationService]  Translation request failed: $e');
+      transLog('TranslationService', 'Translation request failed: $e');
       return null;
     }
   }
@@ -118,8 +119,10 @@ class TranslationService {
 
       return result;
     } catch (e) {
-      print(
-          '[TranslationService]  Analysis of the translation result failed: $e');
+      transLog(
+        'TranslationService',
+        'Analysis of the translation result failed: $e',
+      );
       return null;
     }
   }

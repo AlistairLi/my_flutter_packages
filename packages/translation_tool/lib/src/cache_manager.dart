@@ -237,10 +237,6 @@ class EnhancedCompositeCacheManager implements CacheManager {
 
       if (localEntries.isNotEmpty) {
         await _memoryCache.setAll(localEntries);
-        transLog(tag,
-            'Successfully loaded ${localEntries.length} pieces of cached data into memory');
-      } else {
-        transLog(tag, 'There is no cached data in the local storage.');
       }
 
       _isInitialized = true;
@@ -402,8 +398,6 @@ class EnhancedCompositeCacheManager implements CacheManager {
       await _localCache.setAll(memoryEntries);
       // 更新状态
       _lastSaveTime = DateTime.now().millisecondsSinceEpoch;
-      transLog(tag,
-          '${memoryEntries.length} pieces of cached data have been saved to local storage.');
     } catch (e) {
       transLog(tag, 'Failed to save to local storage: $e');
     }

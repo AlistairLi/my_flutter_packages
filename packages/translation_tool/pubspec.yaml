@@ -1,7 +1,7 @@
 name: translation_tool
 description: A Flutter translation tool library based on Google Translate API with memory and local caching support.
-version: 1.0.1
-repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/translation_tool
+version: 1.0.2
+repository: https://github.com/AChloe/translation_tool
 
 environment:
   sdk: '>=2.19.0 <4.0.0'
