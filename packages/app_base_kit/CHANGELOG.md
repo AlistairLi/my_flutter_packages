@@ -9,3 +9,7 @@
 ## 1.0.2
 
 - New function calculateRemainingGridRows.
+
+## 1.0.3
+
+- Fixed bug.
