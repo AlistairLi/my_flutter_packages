@@ -74,6 +74,13 @@ class MultiTabView2<T, U> extends StatefulWidget {
   /// 宽度缩放因子
   final double widthScaleFactor;
 
+  /// 一级tab双击回调
+  final Function(int firstIndex, T firstTab)? onFirstLevelDoubleTap;
+
+  /// 二级tab双击回调
+  final Function(int firstIndex, int secondIndex, T firstTab, U secondTab)?
+      onSecondLevelDoubleTap;
+
   const MultiTabView2({
     super.key,
     required this.firstLevelTabs,
@@ -96,6 +103,8 @@ class MultiTabView2<T, U> extends StatefulWidget {
     this.initialSecondIndex = 0,
     this.textScaleFactor = 1.0,
     this.widthScaleFactor = 1.0,
+    this.onFirstLevelDoubleTap,
+    this.onSecondLevelDoubleTap,
   }) : assert(firstLevelTabs.length == secondLevelTabs.length);
 
   @override
@@ -214,7 +223,17 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
       tabs: List.generate(widget.firstLevelTabs.length, (index) {
         final tab = widget.firstLevelTabs[index];
         final title = widget.firstLevelTitleExtractor(tab);
-        return Text(title);
+        Widget current = Text(title);
+        if (widget.onFirstLevelDoubleTap != null) {
+          current = GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onDoubleTap: () {
+              widget.onFirstLevelDoubleTap?.call(index, tab);
+            },
+            child: current,
+          );
+        }
+        return current;
       }),
     );
 
@@ -318,13 +337,16 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
         final tab = secondTabs[index];
         final title = widget.secondLevelTitleExtractor(tab);
         Widget current = Text(title);
-        // if (style.unselectedIndicator != null) {
-        //   current = Container(
-        //     decoration: style.unselectedIndicator,
-        //     padding: style.labelPadding,
-        //     child: Text(title),
-        //   );
-        // }
+        if (widget.onSecondLevelDoubleTap != null) {
+          current = GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onDoubleTap: () {
+              widget.onSecondLevelDoubleTap?.call(
+                  firstIndex, index, widget.firstLevelTabs[firstIndex], tab);
+            },
+            child: current,
+          );
+        }
         return current;
       }),
     );

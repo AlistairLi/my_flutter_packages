@@ -57,3 +57,11 @@
 ## 1.1.4
 
 - Optimize MultiTabView2.
+
+## 1.1.5
+
+- Optimize MultiTabView2.
+
+## 1.1.6
+
+- Optimize MultiTabView2.
