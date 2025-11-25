@@ -40,8 +40,8 @@ class StatusPollingWidget extends StatefulWidget {
   /// 滚动结束时的偏移量回调
   final void Function(double offset, double viewportDimension)? onScrollEnd;
 
-  /// 自定义日志标签
-  final String? logTag;
+  /// 当widget从可见变为不可见时，返回可见总时长的回调
+  final void Function(Duration visibleDuration)? onVisibleDuration;
 
   const StatusPollingWidget({
     super.key,
@@ -54,7 +54,7 @@ class StatusPollingWidget extends StatefulWidget {
     this.scrollEndDelay = const Duration(milliseconds: 400),
     this.keepAlive = true,
     this.onScrollEnd,
-    this.logTag,
+    this.onVisibleDuration,
   });
 
   @override
@@ -67,6 +67,8 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
   bool _isVisible = false;
   bool _isScrolling = false;
   double _scrollOffset = 0.0;
+
+  DateTime? _visibleStartTime;
 
   @override
   bool get wantKeepAlive => widget.keepAlive;
@@ -119,10 +121,19 @@ class _StatusPollingWidgetState extends State<StatusPollingWidget>
         child: current,
         onVisible: () {
           _isVisible = true;
+          if (widget.onVisibleDuration != null) {
+            _visibleStartTime = DateTime.now();
+          }
           _updateRefreshState();
         },
         onInvisible: () {
           _isVisible = false;
+          if (widget.onVisibleDuration != null && _visibleStartTime != null) {
+            final visibleDuration =
+                DateTime.now().difference(_visibleStartTime!);
+            widget.onVisibleDuration?.call(visibleDuration);
+            _visibleStartTime = null;
+          }
           _updateRefreshState();
         },
       );

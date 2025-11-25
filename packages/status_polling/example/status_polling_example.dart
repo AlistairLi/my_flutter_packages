@@ -26,7 +26,6 @@ class _AttentionPageExampleState extends State<AttentionPageExample> {
     var itemExtent = 80.0;
     return StatusPollingWidget(
       scrollController: _controller,
-      logTag: _tag,
       onRefreshStatus: (scrollOffset) {
         if (!_controller.hasClients) {
           return;
