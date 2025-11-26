@@ -13,3 +13,7 @@
 ## 1.0.3
 
 - Added the log.
+
+## 1.0.4
+
+- Added the log.
