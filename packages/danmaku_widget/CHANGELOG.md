@@ -25,3 +25,7 @@
 ## 1.0.6
 
 - Support RTL.
+
+## 1.0.7
+
+- Fixed bug.

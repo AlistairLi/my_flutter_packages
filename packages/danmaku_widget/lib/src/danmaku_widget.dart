@@ -404,6 +404,7 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
 
       final index = _animationControllers.indexOf(controller);
       if (index != -1 && index < _animationControllers.length) {
+        controller.stop();
         controller.dispose();
         _animationControllers.removeAt(index);
         _animations.removeAt(index);
@@ -565,13 +566,23 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
   }
 
   void _disposeAnimations() {
-    for (final controller in _animationControllers) {
-      controller.dispose();
-    }
+    final controllersCopy =
+        List<AnimationController>.from(_animationControllers);
+
     _animationControllers.clear();
     _animations.clear();
     _currentDanmaku.clear();
     _currentDanmakuTracks.clear();
+
+    for (final controller in controllersCopy) {
+      if (controller.isDismissed || controller.isCompleted) {
+        controller.dispose();
+      } else {
+        // 如果动画仍在运行，则先停止再释放
+        controller.stop();
+        controller.dispose();
+      }
+    }
   }
 
   /// 暂停弹幕运动
