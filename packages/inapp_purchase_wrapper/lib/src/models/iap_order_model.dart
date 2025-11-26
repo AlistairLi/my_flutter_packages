@@ -32,7 +32,7 @@ class IapOrderModel {
 
   factory IapOrderModel.fromJson(Map<String, dynamic> json) {
     return IapOrderModel(
-      orderNo: json['orderNo'],
+      orderNo: json['orderNo'] ?? '',
       purchaseID: json['purchaseID'],
       productId: json['productId'],
       price: json['price'],

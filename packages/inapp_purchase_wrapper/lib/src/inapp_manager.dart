@@ -84,6 +84,7 @@ class InAppManager {
   Future<bool> startPurchase(String? productId, String? orderNo) async {
     if (productId == null || productId.isEmpty) {
       _onError(
+        orderNo: orderNo,
         source: "checkProductId",
         errorMsg: "productId is empty",
       );
@@ -91,6 +92,7 @@ class InAppManager {
     }
     if (orderNo == null || orderNo.isEmpty) {
       _onError(
+        productId: productId,
         source: "checkOrderNo",
         errorMsg: "orderNo is empty",
       );
@@ -101,6 +103,8 @@ class InAppManager {
     final bool available = await _inAppPurchase.isAvailable();
     if (!available) {
       _onError(
+        productId: productId,
+        orderNo: orderNo,
         source: "checkIsAvailable",
         errorMsg: "available is $available",
       );
@@ -113,6 +117,8 @@ class InAppManager {
 
     if (response.notFoundIDs.isNotEmpty) {
       _onError(
+        productId: productId,
+        orderNo: orderNo,
         source: "notFoundIDs",
         errorMsg: "notFoundIDs",
       );
@@ -123,6 +129,8 @@ class InAppManager {
     final List<ProductDetails> products = response.productDetails;
     if (products.isEmpty) {
       _onError(
+        productId: productId,
+        orderNo: orderNo,
         source: "checkProductDetails",
         errorMsg: "ProductDetailsResponse.productDetails is empty",
       );
@@ -153,10 +161,17 @@ class InAppManager {
       );
       _inAppStorage.saveOrderData(orderNo, order.toJson());
 
-      _log('buyConsumable_result', errorMsg: "$result");
+      _log(
+        'buyConsumable_result',
+        productId: productId,
+        orderNo: orderNo,
+        errorMsg: "$result",
+      );
       return result;
     } catch (e) {
       _onError(
+        productId: productId,
+        orderNo: orderNo,
         source: "buyConsumable_catch",
         errorMsg: "error: ${e.toString()}",
       );
@@ -169,7 +184,7 @@ class InAppManager {
   /// TODO 注意：iOS 在重启后调用 await InAppPurchase.instance.restorePurchases()，才能获取到补单数据；退出登录时获取不到，需要另外处理！
   void _handlePurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
     if (purchaseDetailsList.isEmpty) {
-      _log("handlePurchaseUpdate", errorMsg: "purchaseDetailsList is empty");
+      // _log("handlePurchaseUpdate", errorMsg: "purchaseDetailsList is empty");
       _paymentListener.onPurchaseDetailsEmpty();
       return;
     }
@@ -189,6 +204,7 @@ class InAppManager {
         // 错误
         var iapError = purchaseDetails.error;
         _onError(
+          productId: purchaseDetails.productID,
           source: iapError?.source ?? "",
           errorCode: iapError?.code,
           errorMsg: iapError?.message,
@@ -234,11 +250,23 @@ class InAppManager {
   void _deliverProduct(IapOrderModel orderModel) {
     try {
       _inAppStorage.removeOrder(orderModel.orderNo);
+    } catch (e) {
+      _log(
+        'remove_order_catch',
+        productId: orderModel.productId,
+        orderNo: orderModel.orderNo,
+        errorCode: "-1",
+        errorMsg: e.toString(),
+      );
+    }
+
+    try {
       _onSuccess(orderModel);
     } catch (e) {
       _log(
-        'deliver_product_catch',
+        'on_success_catch',
         productId: orderModel.productId,
+        orderNo: orderModel.orderNo,
         errorCode: "-1",
         errorMsg: e.toString(),
       );
@@ -248,6 +276,7 @@ class InAppManager {
   void _handleInvalidPurchase(
       PurchaseDetails purchaseDetails, VerifyResult result) {
     _onError(
+      productId: purchaseDetails.productID,
       source: "verifyPurchaseFailed",
       errorCode: result.errorCode,
       errorMsg: result.errorMsg,
@@ -282,11 +311,15 @@ class InAppManager {
 
   void _onError(
       {required String source,
+      String? productId,
+      String? orderNo,
       String? errorCode,
       String? errorMsg,
       dynamic details}) {
     _log(
       "onError_$source",
+      productId: productId,
+      orderNo: orderNo,
       errorCode: errorCode,
       errorMsg: errorMsg,
     );
