@@ -21,3 +21,7 @@
 ## 1.0.5
 
 - Added configuration parameters.
+
+## 1.0.6
+
+- Support RTL.

@@ -707,8 +707,8 @@ class _DanmakuWidgetState extends State<DanmakuWidget>
       builder: (context, child) {
         // 不检查状态，让动画自然完成到最后一帧
         // Future.microtask 会在下一个微任务中清理，确保最后一帧渲染完成
-        return Positioned(
-          left: animation.value,
+        return PositionedDirectional(
+          start: animation.value,
           top: trackTop,
           child: child!,
         );
