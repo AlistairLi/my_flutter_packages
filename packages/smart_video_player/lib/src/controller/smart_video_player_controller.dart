@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:video_player/video_player.dart';
 
 /// 视频播放控制器
 class SmartVideoPlayerController extends ChangeNotifier {
@@ -11,12 +12,37 @@ class SmartVideoPlayerController extends ChangeNotifier {
   /// 是否已初始化
   bool get isInitialized => _isInitialized;
 
+  bool _isVisible = false;
+
+  set isVisible(bool visible) => _isVisible = visible;
+
+  VideoPlayerController? videoPlayerController;
+
   /// 播放
   void play() {
     if (_isInitialized && !_isPlaying) {
       _isPlaying = true;
       if (hasListeners) {
         notifyListeners();
+      }
+    }
+  }
+
+  /// 播放
+  void replay() {
+    if (_isInitialized) {
+      if (_isVisible == true) {
+        if (videoPlayerController != null) {
+          if (videoPlayerController!.hasListeners) {
+            if (videoPlayerController!.value.isPlaying != true) {
+              videoPlayerController!.play();
+              _isPlaying = true;
+            }
+          }
+        }
+        if (hasListeners) {
+          notifyListeners();
+        }
       }
     }
   }

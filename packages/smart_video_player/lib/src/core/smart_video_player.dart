@@ -125,7 +125,8 @@ class SmartVideoPlayer extends StatefulWidget {
   final bool keepAlive;
 
   /// 是否自动播放
-  // final bool autoPlay;
+  /// 慎用这个参数。
+  final bool autoPlay;
 
   /// 是否显示 Loading
   final bool showLoading;
@@ -148,7 +149,7 @@ class SmartVideoPlayer extends StatefulWidget {
     this.fit = BoxFit.contain,
     this.clickPlay = true,
     this.keepAlive = true,
-    // this.autoPlay = true,
+    this.autoPlay = true,
     this.showLoading = true,
     this.controller,
     this.volume = 1,
@@ -204,7 +205,7 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
     _chewieController = ChewieController(
       videoPlayerController: _videoController,
       autoInitialize: true,
-      autoPlay: true,
+      autoPlay: widget.autoPlay,
       looping: true,
       showControls: false,
     );
@@ -212,6 +213,7 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
     // 设置控制器状态
     _localController.setInitialized(true);
+    _localController.videoPlayerController = _videoController;
     _localController.setPlayingState(_videoController.value.isPlaying);
 
     _isInit = true;
@@ -512,9 +514,11 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
         builder: (context, child) {
           return VisibilityDetectorWidget(
             onVisible: () {
+              _localController.isVisible = true;
               _play();
             },
             onInvisible: () {
+              _localController.isVisible = false;
               _pause();
             },
             child: Stack(

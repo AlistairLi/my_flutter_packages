@@ -26,3 +26,7 @@
 ## 1.0.6
 
 - Fixed bug.
+
+## 1.0.7
+
+- Fixed bug.
