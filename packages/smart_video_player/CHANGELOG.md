@@ -30,3 +30,7 @@
 ## 1.0.7
 
 - Fixed bug.
+
+## 1.0.8
+
+- Fixed bug.
