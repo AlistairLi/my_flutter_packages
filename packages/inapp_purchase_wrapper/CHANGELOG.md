@@ -17,3 +17,7 @@
 ## 1.0.4
 
 - Added the log.
+
+## 1.0.5
+
+- Upgrade the dependent libraries.

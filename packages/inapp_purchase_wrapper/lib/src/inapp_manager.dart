@@ -14,8 +14,10 @@ class InAppManager {
   /// 内购事件流监听
   StreamSubscription? _purchaseSubscription;
 
-  /// 自动消费标志
-  final bool _autoConsume = true;
+  // 在 iOS 上必须启用自动消耗（auto-consume）。
+  // To try without auto-consume on another platform, change `true` to `false` here.
+  // ignore: no_literal_bool_comparisons
+  final bool _kAutoConsume = Platform.isIOS || true;
 
   final IInAppPlatform _inAppPlatform;
 
@@ -147,7 +149,7 @@ class InAppManager {
 
       bool result = await _inAppPurchase.buyConsumable(
         purchaseParam: purchaseParam,
-        autoConsume: _autoConsume,
+        autoConsume: _kAutoConsume,
       );
 
       IapOrderModel order = IapOrderModel(
@@ -183,12 +185,6 @@ class InAppManager {
   /// 注意：调用InAppPurchase.instance.restorePurchases()后，如果没有需要补单，purchaseDetailsList为空
   /// TODO 注意：iOS 在重启后调用 await InAppPurchase.instance.restorePurchases()，才能获取到补单数据；退出登录时获取不到，需要另外处理！
   void _handlePurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
-    if (purchaseDetailsList.isEmpty) {
-      // _log("handlePurchaseUpdate", errorMsg: "purchaseDetailsList is empty");
-      _paymentListener.onPurchaseDetailsEmpty();
-      return;
-    }
-
     for (var purchaseDetails in purchaseDetailsList) {
       _processPurchaseDetails(purchaseDetails);
     }
@@ -336,10 +332,11 @@ class InAppManager {
 
   void _onCanceled(PurchaseDetails purchaseDetails) {
     _log(
-      'onCanceled',
+      'onCanceled_${purchaseDetails.error?.source ?? ''}',
       productId: purchaseDetails.productID,
       errorCode: purchaseDetails.error?.code ?? "",
-      errorMsg: purchaseDetails.status.name,
+      errorMsg:
+          "message: ${purchaseDetails.error?.message ?? ""}, details: ${purchaseDetails.error?.details.toString()}",
     );
     _paymentListener.onCanceled(purchaseDetails);
   }
