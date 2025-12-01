@@ -4,22 +4,11 @@ import 'package:audio_session/audio_session.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:smart_video_player/src/controller/smart_video_player_controller.dart';
+import 'package:smart_video_player/smart_video_player.dart';
 import 'package:smart_video_player/src/controller/smart_video_progress_controller.dart';
 import 'package:smart_video_player/src/preload/file_cache_manager.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector_widget/visibility_detector_widget.dart';
-
-enum SmartVideoSourceType {
-  /// asset 资源
-  asset,
-
-  /// 本地文件
-  file,
-
-  /// 网络视频
-  network,
-}
 
 /// 进度条配置类
 class SmartVideoProgressBarConfig {
@@ -124,12 +113,8 @@ class SmartVideoPlayer extends StatefulWidget {
   /// 是否保持播放器状态
   final bool keepAlive;
 
-  /// 是否自动初始化, 默认为 true
-  final bool autoInitialize;
-
-  /// 是否自动播放, 默认为 true
-  /// 慎用这个参数。
-  final bool autoPlay;
+  /// 是否自动播放
+  // final bool autoPlay;
 
   /// 是否显示 Loading
   final bool showLoading;
@@ -152,8 +137,7 @@ class SmartVideoPlayer extends StatefulWidget {
     this.fit = BoxFit.contain,
     this.clickPlay = true,
     this.keepAlive = true,
-    this.autoInitialize = true,
-    this.autoPlay = true,
+    // this.autoPlay = true,
     this.showLoading = true,
     this.controller,
     this.volume = 1,
@@ -208,8 +192,8 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
     _chewieController = ChewieController(
       videoPlayerController: _videoController,
-      autoInitialize: widget.autoInitialize,
-      autoPlay: widget.autoPlay,
+      autoInitialize: true,
+      autoPlay: true,
       looping: true,
       showControls: false,
     );
@@ -217,7 +201,6 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
 
     // 设置控制器状态
     _localController.setInitialized(true);
-    _localController.videoPlayerController = _videoController;
     _localController.setPlayingState(_videoController.value.isPlaying);
 
     _isInit = true;
@@ -238,21 +221,8 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
   /// 播放
   void _play({bool isManual = false}) async {
     if (mounted && _isInit) {
-      if (widget.autoPlay != true) {
-        // 等待初始化完成
-        if (!_videoController.value.isInitialized) {
-          try {
-            await _videoController.initialize();
-          } catch (e) {
-            // 处理初始化失败情况
-            return;
-          }
-        }
-      }
-      // 无论自动播放还是手动播放，都应该确保视频已初始化
-      bool shouldPlay = (_videoController.value.isInitialized == true &&
-          _videoController.value.isPlaying == false);
-      if (shouldPlay) {
+      if (_videoController.value.isInitialized == true &&
+          _videoController.value.isPlaying == false) {
         // 设置音频输出
         final AudioSession session = await AudioSession.instance;
         await session.configure(const AudioSessionConfiguration.music());
@@ -531,11 +501,9 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
         builder: (context, child) {
           return VisibilityDetectorWidget(
             onVisible: () {
-              _localController.isVisible = true;
               _play();
             },
             onInvisible: () {
-              _localController.isVisible = false;
               _pause();
             },
             child: Stack(

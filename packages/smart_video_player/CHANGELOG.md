@@ -34,3 +34,7 @@
 ## 1.0.8
 
 - Fixed bug.
+
+## 1.0.9
+
+- VideoPager.

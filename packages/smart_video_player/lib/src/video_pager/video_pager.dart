@@ -1,0 +1,198 @@
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/material.dart';
+import 'package:smart_video_player/smart_video_player.dart';
+import 'package:smart_video_player/src/video_pager/video_controller_manager.dart';
+import 'package:smart_video_player/src/video_pager/video_widget.dart';
+import 'package:visibility_detector_widget/visibility_detector_widget.dart';
+
+class VideoPager extends StatefulWidget {
+  const VideoPager({
+    super.key,
+    required this.items,
+    this.initialPage = 0,
+    this.controller,
+    this.overlayBuilder,
+    this.fit = BoxFit.cover,
+    this.onPageChanged,
+  });
+
+  final List<VideoItem> items;
+
+  /// 初始页面索引，默认为 0
+  final int initialPage;
+
+  final VideoPagerController? controller;
+
+  final VideoOverlayBuilder? overlayBuilder;
+
+  final BoxFit fit;
+
+  final void Function(int index, VideoItem item)? onPageChanged;
+
+  @override
+  State<VideoPager> createState() => _VideoPagerState();
+}
+
+class _VideoPagerState extends State<VideoPager> {
+  final CarouselSliderController carouselSliderController =
+      CarouselSliderController();
+
+  late List<VideoItem> _items;
+  late int _initialPage;
+  late int _currentIndex;
+
+  /// 视频预加载管理器
+  final VideoPreloadManager _videoPreloadManager = VideoPreloadManager();
+
+  final VideoControllerManager _controllerManager = VideoControllerManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _items = widget.items;
+    _initialPage = widget.initialPage;
+    _currentIndex = _initialPage;
+    _controllerManager.setCurrentPlayingIndex(_currentIndex);
+
+    _initExternalController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _initExternalController() {
+    if (widget.controller == null) return;
+
+    widget.controller!.play = () {
+      _controllerManager.playVideo(_currentIndex);
+    };
+
+    widget.controller!.pause = () {
+      _controllerManager.pauseAll();
+    };
+
+    widget.controller!.nextPage = () {
+      carouselSliderController.nextPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    };
+
+    widget.controller!.previousPage = () {
+      carouselSliderController.previousPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    };
+
+    widget.controller!.jumpToRealIndex = (index) {
+      carouselSliderController.jumpToPage(index);
+    };
+  }
+
+  void _onPageChanged(int index) {
+    _currentIndex = index;
+    _controllerManager.setCurrentPlayingIndex(_currentIndex);
+
+    // 播放当前页面视频
+    _controllerManager.playVideo(_currentIndex);
+
+    if (widget.onPageChanged != null) {
+      widget.onPageChanged!(index, widget.items[index]);
+    }
+  }
+
+  /// 预加载相邻视频
+  ///
+  /// [currentIndex] 当前视频索引
+  /// [mediaList] 媒体列表
+  Future<void> preloadAdjacentVideos(
+      int currentIndex, List<VideoItem> mediaList) async {
+    if (mediaList.isEmpty) return;
+    var list = List<VideoItem>.from(mediaList);
+
+    // 获取所有媒体项URL
+    final allUrls = list
+        .map((element) => element.url)
+        .where((element) => element.isNotEmpty)
+        .cast<String>()
+        .toList();
+
+    var currentUrl = list[currentIndex].url;
+
+    // 调用预加载管理器
+    await _videoPreloadManager.preloadAdjacentVideosFromMixedList(
+      currentMediaUrl: currentUrl,
+      allMediaUrls: allUrls,
+      videoUrls: allUrls,
+      preloadCount: 3,
+    );
+
+    // 打印队列状态（用于调试）
+    _videoPreloadManager.printQueueStatus();
+  }
+
+  /// 清理远离当前位置的视频缓存
+  ///
+  /// [currentIndex] 当前视频索引
+  /// [mediaList] 媒体列表
+  void cleanupDistantVideos(int currentIndex, List<VideoItem> mediaList) {
+    if (mediaList.isEmpty) return;
+    var list = List<VideoItem>.from(mediaList);
+
+    // 获取所有媒体项URL
+    final allUrls = list
+        .map((element) => element.url)
+        .where((element) => element.isNotEmpty)
+        .cast<String>()
+        .toList();
+
+    var currentUrl = list[currentIndex].url;
+
+    // 清理远离当前位置的缓存
+    _videoPreloadManager.cleanupDistantCache(
+      currentMediaUrl: currentUrl,
+      allMediaUrls: allUrls,
+      videoUrls: allUrls,
+      keepRange: 2,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetectorWidget(
+      key: Key(hashCode.toString() + DateTime.now().toString()),
+      onVisible: () {
+        _controllerManager.playVideo(_currentIndex);
+      },
+      onInvisible: () {
+        _controllerManager.pauseAll();
+      },
+      child: CarouselSlider.builder(
+        itemCount: _items.length,
+        itemBuilder: (context, i, realIndex) {
+          var item = _items[i];
+          return VideoWidget(
+            videoItem: item,
+            index: i,
+            fit: widget.fit,
+            overlayBuilder: (context, item, {index}) {
+              return widget.overlayBuilder?.call(context, item, index: i) ??
+                  Container();
+            },
+          );
+        },
+        carouselController: carouselSliderController,
+        options: CarouselOptions(
+          height: double.infinity,
+          initialPage: _initialPage,
+          viewportFraction: 1.0,
+          disableCenter: false,
+          onPageChanged: (index, reason) => _onPageChanged(index),
+        ),
+      ),
+    );
+  }
+}
