@@ -13,6 +13,8 @@ class VideoPager extends StatefulWidget {
     this.controller,
     this.overlayBuilder,
     this.fit = BoxFit.cover,
+    this.preloadCount = 1,
+    this.keepRange = 1,
     this.onPageChanged,
   });
 
@@ -26,6 +28,10 @@ class VideoPager extends StatefulWidget {
   final VideoOverlayBuilder? overlayBuilder;
 
   final BoxFit fit;
+
+  final int preloadCount;
+
+  final int keepRange;
 
   final void Function(int index, VideoItem item)? onPageChanged;
 
@@ -127,7 +133,7 @@ class _VideoPagerState extends State<VideoPager> {
       currentMediaUrl: currentUrl,
       allMediaUrls: allUrls,
       videoUrls: allUrls,
-      preloadCount: 3,
+      preloadCount: widget.preloadCount,
     );
 
     // 打印队列状态（用于调试）
@@ -156,7 +162,7 @@ class _VideoPagerState extends State<VideoPager> {
       currentMediaUrl: currentUrl,
       allMediaUrls: allUrls,
       videoUrls: allUrls,
-      keepRange: 2,
+      keepRange: widget.keepRange,
     );
   }
 
