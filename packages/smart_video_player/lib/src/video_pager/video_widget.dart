@@ -13,13 +13,20 @@ class VideoWidget extends StatefulWidget {
     required this.videoItem,
     required this.index,
     this.overlayBuilder,
+    this.showCover = true,
+    this.coverImageProvider,
     this.fit = BoxFit.cover,
   });
 
   final VideoItem videoItem;
 
   final int index;
+
   final VideoOverlayBuilder? overlayBuilder;
+
+  final bool showCover;
+
+  final ImageProvider? coverImageProvider;
 
   final BoxFit fit;
 
@@ -45,7 +52,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   void dispose() {
-    _controllerManager.unregisterController(widget.index);
+    _controllerManager.unregisterController(widget.index, _videoController);
     _videoController?.removeListener(_videoListener);
     _videoController?.dispose();
     _videoController = null;
@@ -95,15 +102,17 @@ class _VideoWidgetState extends State<VideoWidget> {
   Widget build(BuildContext context) {
     Widget current = Stack(
       children: [
-        Positioned.fill(
-          child: Image.network(
-            _item.coverImage ?? '',
-            fit: _fit,
-            errorBuilder: (context, error, stackTrace) {
-              return SizedBox.shrink();
-            },
+        if (widget.showCover)
+          Positioned.fill(
+            child: Image(
+              image: widget.coverImageProvider ??
+                  NetworkImage(_item.coverImage ?? ''),
+              fit: _fit,
+              errorBuilder: (context, error, stackTrace) {
+                return SizedBox.shrink();
+              },
+            ),
           ),
-        ),
         if (_videoController?.value.isInitialized == true)
           Positioned.fill(
             child: ClipRect(

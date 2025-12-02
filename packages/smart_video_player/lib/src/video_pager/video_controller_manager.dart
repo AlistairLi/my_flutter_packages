@@ -15,8 +15,13 @@ class VideoControllerManager {
     _controllers[index] = controller;
   }
 
-  void unregisterController(int index) {
-    _controllers.remove(index);
+  /// 注销指定索引的控制器，只有当控制器匹配时才移除
+  void unregisterController(
+      int index, VideoPlayerController? expectedController) {
+    // 严格检查：只有存储的控制器与期望的控制器是同一个实例时才移除
+    if (_controllers[index] == expectedController) {
+      _controllers.remove(index);
+    }
   }
 
   VideoPlayerController? getController(int index) {
@@ -46,12 +51,26 @@ class VideoControllerManager {
       if (controller.value.isInitialized) {
         await controller.play();
       } else {
-        controller.addListener(() {
-          if (controller.value.isInitialized &&
-              controller.value.isPlaying == false) {
+        // 创建具名监听器函数以便后续移除
+        void onControllerUpdate() {
+          if (controller.value.isInitialized) {
+            controller.removeListener(onControllerUpdate); // 移除监听器
+            if (!controller.value.isPlaying) {
+              controller.play();
+            }
+          }
+        }
+
+        // 添加监听器
+        controller.addListener(onControllerUpdate);
+
+        // 双重检查：防止在添加监听器之前就已经初始化完成
+        if (controller.value.isInitialized) {
+          controller.removeListener(onControllerUpdate);
+          if (!controller.value.isPlaying) {
             controller.play();
           }
-        });
+        }
       }
     }
 

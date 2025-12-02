@@ -12,6 +12,8 @@ class VideoPager extends StatefulWidget {
     this.initialPage = 0,
     this.controller,
     this.overlayBuilder,
+    this.showCover = true,
+    this.coverImageBuilder,
     this.fit = BoxFit.cover,
     this.preloadCount = 1,
     this.keepRange = 1,
@@ -26,6 +28,10 @@ class VideoPager extends StatefulWidget {
   final VideoPagerController? controller;
 
   final VideoOverlayBuilder? overlayBuilder;
+
+  final bool showCover;
+
+  final ImageProvider Function(int index, VideoItem item)? coverImageBuilder;
 
   final BoxFit fit;
 
@@ -184,6 +190,8 @@ class _VideoPagerState extends State<VideoPager> {
             videoItem: item,
             index: i,
             fit: widget.fit,
+            showCover: widget.showCover,
+            coverImageProvider: widget.coverImageBuilder?.call(i, item),
             overlayBuilder: (context, item, {index}) {
               return widget.overlayBuilder?.call(context, item, index: i) ??
                   Container();

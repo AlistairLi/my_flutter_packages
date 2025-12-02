@@ -46,3 +46,11 @@
 ## 1.1.1
 
 - Downgrading of video_player and video_player_android.
+
+## 1.1.2
+
+- Fixed bug.
+
+## 1.1.3
+
+- Fixed bug.
