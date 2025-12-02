@@ -1,8 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_video_player/smart_video_player.dart';
-import 'package:smart_video_player/src/video_pager/video_controller_manager.dart';
-import 'package:smart_video_player/src/video_pager/video_widget.dart';
 import 'package:visibility_detector_widget/visibility_detector_widget.dart';
 
 class VideoPager extends StatefulWidget {
@@ -17,6 +15,7 @@ class VideoPager extends StatefulWidget {
     this.fit = BoxFit.cover,
     this.preloadCount = 1,
     this.keepRange = 1,
+    this.preloadToLocal = true,
     this.onPageChanged,
   });
 
@@ -38,6 +37,9 @@ class VideoPager extends StatefulWidget {
   final int preloadCount;
 
   final int keepRange;
+
+  /// 是否预加载视频到本地，默认为true
+  final bool preloadToLocal;
 
   final void Function(int index, VideoItem item)? onPageChanged;
 
@@ -69,6 +71,8 @@ class _VideoPagerState extends State<VideoPager> {
     _controllerManager.setCurrentPlayingIndex(_currentIndex);
 
     _initExternalController();
+
+    preloadAdjacentVideos(0, _items);
   }
 
   @override
@@ -118,6 +122,11 @@ class _VideoPagerState extends State<VideoPager> {
     if (widget.onPageChanged != null) {
       widget.onPageChanged!(index, widget.items[index]);
     }
+
+    // 预加载相邻视频到本地
+    preloadAdjacentVideos(index, _items);
+    // 清理远离当前位置的视频缓存
+    cleanupDistantVideos(index, _items);
   }
 
   /// 预加载相邻视频
@@ -126,6 +135,8 @@ class _VideoPagerState extends State<VideoPager> {
   /// [mediaList] 媒体列表
   Future<void> preloadAdjacentVideos(
       int currentIndex, List<VideoItem> mediaList) async {
+    // 如果不启用预加载到本地，则直接返回
+    if (!widget.preloadToLocal) return;
     if (mediaList.isEmpty) return;
     var list = List<VideoItem>.from(mediaList);
 
@@ -155,6 +166,8 @@ class _VideoPagerState extends State<VideoPager> {
   /// [currentIndex] 当前视频索引
   /// [mediaList] 媒体列表
   void cleanupDistantVideos(int currentIndex, List<VideoItem> mediaList) {
+    // 如果不启用预加载到本地，则直接返回
+    if (!widget.preloadToLocal) return;
     if (mediaList.isEmpty) return;
     var list = List<VideoItem>.from(mediaList);
 

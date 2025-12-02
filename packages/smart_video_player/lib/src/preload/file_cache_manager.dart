@@ -7,7 +7,7 @@ class FileCacheManager {
     Config(
       key,
       stalePeriod: const Duration(days: 10),
-      maxNrOfCacheObjects: 30,
+      maxNrOfCacheObjects: 50,
       repo: JsonCacheInfoRepository(databaseName: key),
       fileSystem: IOFileSystem(key),
       fileService: HttpFileService(),

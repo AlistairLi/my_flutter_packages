@@ -58,3 +58,7 @@
 ## 1.1.5
 
 - Fixed bug.
+
+## 1.1.6
+
+- Preloading optimization.

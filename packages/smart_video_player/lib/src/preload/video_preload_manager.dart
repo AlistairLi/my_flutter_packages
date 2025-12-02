@@ -267,81 +267,69 @@ class VideoPreloadManager {
       return;
     }
 
-    // 在混合列表中找到当前项的索引
-    final currentIndexInMixedList = allMediaUrls.indexOf(currentMediaUrl);
-
-    if (currentIndexInMixedList == -1) {
-      return;
-    }
+    final currentIndex = allMediaUrls.indexOf(currentMediaUrl);
+    if (currentIndex == -1) return;
 
     try {
-      // 创建一个Set用于快速查找视频URL
-      final videoUrlSet = videoUrls.toSet();
+      final videoSet = videoUrls.toSet();
+      final videosToPreload = <String>{};
 
-      // 收集需要预加载的视频
-      final videosToPreload = <String>[];
-
-      // 如果当前项本身就是视频，添加到列表
-      if (videoUrlSet.contains(currentMediaUrl)) {
+      // 当前项是视频则加入
+      if (videoSet.contains(currentMediaUrl)) {
         videosToPreload.add(currentMediaUrl);
       }
 
-      int forwardFoundCount = 0; // 向前找到的数量
-      int forwardSearchRange = 1; // 向前搜索范围
-      while (forwardFoundCount < preloadCount) {
-        // 向前搜索（如果还没找够）
-        final prevIndex = currentIndexInMixedList - forwardSearchRange;
-        if (prevIndex >= 0) {
-          final url = allMediaUrls[prevIndex];
-          if (videoUrlSet.contains(url) && !videosToPreload.contains(url)) {
+      /// 封装一个“按方向循环查找视频”的函数
+      /// direction = -1 → 向前，+1 → 向后
+      Future<void> search(int direction) async {
+        int found = 0;
+        int step = 1;
+        final len = allMediaUrls.length;
+
+        while (found < preloadCount) {
+          int idx = (currentIndex + direction * step) % len;
+          if (idx < 0) idx += len; // 处理负数取模
+
+          final url = allMediaUrls[idx];
+          if (videoSet.contains(url) && !videosToPreload.contains(url)) {
             videosToPreload.add(url);
-            forwardFoundCount++;
+            found++;
           }
-        } else {
-          break;
+
+          step++;
+
+          // 避免死循环：如果全列表视频数量 < preloadCount，也会自动停止
+          if (step > len) break;
         }
-        forwardSearchRange++;
       }
 
-      int backwardFoundCount = 0; // 向后找到的数量
-      int backwardSearchRange = 1; // 向后搜索范围
-      while (backwardFoundCount < preloadCount) {
-        // 向后搜索（如果还没找够）
-        final nextIndex = currentIndexInMixedList + backwardSearchRange;
-        if (nextIndex < allMediaUrls.length) {
-          final url = allMediaUrls[nextIndex];
-          if (videoUrlSet.contains(url) && !videosToPreload.contains(url)) {
-            videosToPreload.add(url);
-            backwardFoundCount++;
-          }
-        } else {
-          break;
-        }
-        backwardSearchRange++;
-      }
+      // 向前循环查找 preloadCount 个
+      await search(-1);
 
-      // 预加载收集到的视频
-      for (final videoUrl in videosToPreload) {
-        final indexInVideoList = videoUrls.indexOf(videoUrl);
-        if (indexInVideoList != -1) {
-          // 当前项或最近的视频使用高优先级，其他使用中优先级
-          final priority = videoUrl == currentMediaUrl ||
-                  (videosToPreload.isNotEmpty &&
-                      videoUrl == videosToPreload.first)
+      // 向后循环查找 preloadCount 个
+      await search(1);
+
+      // ============== 开始执行预加载任务 ==============
+      for (final url in videosToPreload) {
+        final indexInVideoList = videoUrls.indexOf(url);
+        if (indexInVideoList == -1) continue;
+
+        final bool isHighPriority =
+            url == currentMediaUrl || url == videosToPreload.first;
+
+        await addTask(
+          videoUrl: url,
+          index: indexInVideoList,
+          priority: isHighPriority
               ? VideoDownloadPriority.high
-              : VideoDownloadPriority.medium;
-
-          await addTask(
-            videoUrl: videoUrl,
-            index: indexInVideoList,
-            priority: priority,
-          );
-        }
+              : VideoDownloadPriority.medium,
+        );
       }
     } catch (e) {
       _mLog(
-          'Preloading of adjacent videos from mixed list failed: currentMediaUrl=$currentMediaUrl, error=$e',
-          tag: _tag);
+        'Preloading adjacent videos failed: currentMediaUrl=$currentMediaUrl, error=$e',
+        tag: _tag,
+      );
     }
   }
 
@@ -375,57 +363,57 @@ class VideoPreloadManager {
     }
 
     // 在混合列表中找到当前项的索引
-    final currentIndexInMixedList = allMediaUrls.indexOf(currentMediaUrl);
+    final currentIndex = allMediaUrls.indexOf(currentMediaUrl);
+    if (currentIndex == -1) return;
 
-    // 如果当前项不在列表中，直接返回
-    if (currentIndexInMixedList == -1) {
-      return;
-    }
-
-    // 创建一个Set用于快速查找视频URL
-    final videoUrlSet = videoUrls.toSet();
-
-    // 收集需要保留的视频URL
+    final videoSet = videoUrls.toSet();
     final videosToKeep = <String>{};
 
-    // 如果当前项是视频，保留它
-    if (videoUrlSet.contains(currentMediaUrl)) {
+    // 当前项是视频则保留
+    if (videoSet.contains(currentMediaUrl)) {
       videosToKeep.add(currentMediaUrl);
     }
 
-    // 从当前位置向前搜索，保留前面 keepRange 个视频
-    int forwardFoundCount = 0;
-    for (int i = currentIndexInMixedList - 1;
-        i >= 0 && forwardFoundCount < keepRange;
-        i--) {
-      final url = allMediaUrls[i];
-      if (videoUrlSet.contains(url)) {
-        videosToKeep.add(url);
-        forwardFoundCount++;
-      }
-    }
+    /// 封装：按方向循环查找 keepRange 个视频
+    /// direction = -1 (向前)，+1 (向后)
+    void search(int direction) {
+      int found = 0;
+      int step = 1;
+      final len = allMediaUrls.length;
 
-    // 从当前位置向后搜索，保留后面 keepRange 个视频
-    int backwardFoundCount = 0;
-    for (int i = currentIndexInMixedList + 1;
-        i < allMediaUrls.length && backwardFoundCount < keepRange;
-        i++) {
-      final url = allMediaUrls[i];
-      if (videoUrlSet.contains(url)) {
-        videosToKeep.add(url);
-        backwardFoundCount++;
-      }
-    }
+      while (found < keepRange) {
+        int idx = (currentIndex + direction * step) % len;
+        if (idx < 0) idx += len;
 
-    // 清理不在保留列表中的视频
-    for (final videoUrl in videoUrls) {
-      if (!videosToKeep.contains(videoUrl)) {
-        // 取消正在下载的任务
-        if (_downloadingUrls.contains(videoUrl)) {
-          cancelDownload(videoUrl);
+        final url = allMediaUrls[idx];
+        if (videoSet.contains(url) && !videosToKeep.contains(url)) {
+          videosToKeep.add(url);
+          found++;
         }
-        // 从队列中移除
-        _downloadQueue.removeWhere((task) => task.videoUrl == videoUrl);
+
+        step++;
+
+        // 避免死循环：扫描全列表后仍找不到就停止
+        if (step > len) break;
+      }
+    }
+
+    // 向前循环保留 keepRange 个
+    search(-1);
+
+    // 向后循环保留 keepRange 个
+    search(1);
+
+    // =========== 开始清理不需要的缓存 ===========
+    for (final url in videoUrls) {
+      if (!videosToKeep.contains(url)) {
+        // 取消下载
+        if (_downloadingUrls.contains(url)) {
+          cancelDownload(url);
+        }
+
+        // 从下载队列中移除
+        _downloadQueue.removeWhere((task) => task.videoUrl == url);
       }
     }
   }
