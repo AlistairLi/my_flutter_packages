@@ -53,6 +53,8 @@ class _VideoPagerState extends State<VideoPager> {
   late int _initialPage;
   late int _currentIndex;
 
+  bool _isVisible = false;
+
   /// 视频预加载管理器
   final VideoPreloadManager _videoPreloadManager = VideoPreloadManager();
 
@@ -78,7 +80,9 @@ class _VideoPagerState extends State<VideoPager> {
     if (widget.controller == null) return;
 
     widget.controller!.play = () {
-      _controllerManager.playVideo(_currentIndex);
+      if (_isVisible) {
+        _controllerManager.playVideo(_currentIndex);
+      }
     };
 
     widget.controller!.pause = () {
@@ -177,9 +181,11 @@ class _VideoPagerState extends State<VideoPager> {
     return VisibilityDetectorWidget(
       key: Key(hashCode.toString() + DateTime.now().toString()),
       onVisible: () {
-        _controllerManager.playVideo(_currentIndex);
+        _isVisible = true;
+        _controllerManager.playVideo(_currentIndex, retryCount: 3);
       },
       onInvisible: () {
+        _isVisible = false;
         _controllerManager.pauseAll();
       },
       child: CarouselSlider.builder(

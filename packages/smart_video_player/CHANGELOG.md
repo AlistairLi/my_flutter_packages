@@ -54,3 +54,7 @@
 ## 1.1.3
 
 - Fixed bug.
+
+## 1.1.5
+
+- Fixed bug.

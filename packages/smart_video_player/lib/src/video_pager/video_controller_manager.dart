@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoControllerManager {
@@ -35,17 +36,30 @@ class VideoControllerManager {
   int? get currentPlayingIndex => _currentPlayingIndex;
 
   /// 播放指定索引的视频
-  Future<void> playVideo(int index) async {
+  Future<void> playVideo(int index, {int retryCount = 0}) async {
+    final controller = _controllers[index];
+
+    // 如果 controller 为 null，尝试重试
+    if (controller == null && retryCount > 0) {
+      if (kDebugMode) {
+        print(
+            "[VideoControllerManager]: playVideo(), index: $index, controller is null, retryCount: $retryCount, Trying to retry...");
+      }
+      await Future.delayed(Duration(milliseconds: 50));
+      return playVideo(index, retryCount: retryCount - 1);
+    }
+
     // 先暂停当前播放的视频
     if (_currentPlayingIndex != null && _currentPlayingIndex != index) {
       final currentController = _controllers[_currentPlayingIndex];
-      if (currentController != null && currentController.value.isInitialized) {
+      if (currentController != null &&
+          currentController.value.isInitialized &&
+          currentController.value.isPlaying) {
         currentController.pause();
       }
     }
 
     // 播放新视频
-    final controller = _controllers[index];
     if (controller != null) {
       // 如果已初始化则直接播放，否则等待初始化完成后再播放
       if (controller.value.isInitialized) {
@@ -72,6 +86,11 @@ class VideoControllerManager {
           }
         }
       }
+    } else {
+      if (kDebugMode) {
+        print(
+            "[VideoControllerManager]: playVideo(), index: $index, controller is null");
+      }
     }
 
     _currentPlayingIndex = index;
@@ -80,7 +99,7 @@ class VideoControllerManager {
   /// 暂停所有视频
   void pauseAll() {
     for (var controller in _controllers.values) {
-      if (controller.value.isInitialized) {
+      if (controller.value.isInitialized && controller.value.isPlaying) {
         controller.pause();
       }
     }
