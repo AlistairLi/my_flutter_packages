@@ -62,3 +62,7 @@
 ## 1.1.6
 
 - Preloading optimization.
+
+## 1.1.7
+
+- Fix the issue of the video progress bar in RTL context.

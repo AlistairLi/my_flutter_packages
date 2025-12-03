@@ -370,7 +370,7 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
                             children: [
                               // 已播放进度
                               FractionallySizedBox(
-                                alignment: Alignment.centerLeft,
+                                alignment: AlignmentDirectional.centerStart,
                                 widthFactor: _progressController.progress,
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -384,8 +384,8 @@ class _SmartVideoPlayerState extends State<SmartVideoPlayer>
                           ),
                         ),
                         // 拖拽指示器
-                        Positioned(
-                          left: (_progressController.progress *
+                        PositionedDirectional(
+                          start: (_progressController.progress *
                               (MediaQuery.of(context).size.width -
                                   config.padding.horizontal -
                                   indicatorSize)),
