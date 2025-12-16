@@ -66,3 +66,6 @@
 ## 1.1.7
 
 - Fix the issue of the video progress bar in RTL context.
+
+## 1.1.8
+- Add SimpleVideoPlayer.
