@@ -101,7 +101,9 @@ class _SmartVideoPlayerState extends State<SimpleVideoPlayer>
     await _videoController.initialize();
     _createChewieController();
     _addVideoListener();
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   /// 添加视频播放状态监听
