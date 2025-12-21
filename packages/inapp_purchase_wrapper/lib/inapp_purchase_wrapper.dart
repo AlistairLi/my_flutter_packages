@@ -1,6 +1,7 @@
 library;
 
 export 'package:in_app_purchase/in_app_purchase.dart';
+export 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 export 'src/inapp_manager.dart';
 export 'src/logger/i_iap_logger.dart';

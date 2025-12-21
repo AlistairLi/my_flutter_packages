@@ -1,4 +1,3 @@
-import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:inapp_purchase_wrapper/inapp_purchase_wrapper.dart';
 import 'package:inapp_purchase_wrapper/src/platform/i_inapp_platform.dart';
 
