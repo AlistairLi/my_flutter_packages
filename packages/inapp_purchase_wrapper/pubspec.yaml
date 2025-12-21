@@ -1,6 +1,6 @@
 name: inapp_purchase_wrapper
 description: A comprehensive wrapper for Flutter's in_app_purchase plugin that simplifies cross-platform (Android/iOS) in-app purchases with unified APIs for product purchasing, verification, and order management.
-version: 1.0.5
+version: 1.0.6
 repository: https://github.com/my_tree/packages/inapp_purchase_wrapper
 
 environment:
@@ -8,8 +8,8 @@ environment:
 
 dependencies:
   in_app_purchase: 3.2.3
-  in_app_purchase_android: 0.4.0+3
-  in_app_purchase_storekit: 0.4.4
+#  in_app_purchase_android: 0.4.0+3
+#  in_app_purchase_storekit: 0.4.4
 
 dev_dependencies:
   lints: ^2.0.0

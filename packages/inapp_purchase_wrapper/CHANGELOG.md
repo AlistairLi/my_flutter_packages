@@ -21,3 +21,7 @@
 ## 1.0.5
 
 - Upgrade the dependent libraries.
+
+## 1.0.6
+
+- Fixed bug.

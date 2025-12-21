@@ -18,7 +18,8 @@ class InAppIOSPlatform implements IInAppPlatform {
       {required IInAppStorage storage,
       required PurchaseDetails purchaseDetails,
       required IInAppVerifier verifier}) async {
-    // TODO 注意，iOS在补单时（调用InAppPurchase.instance.restorePurchases()），不能通过透传从details 拿到orderNo，需要另外处理
+    // 注意，iOS在补单时（调用InAppPurchase.instance.restorePurchases()），
+    // 不能通过透传从details 拿到orderNo，需要通过purchaseID获取本地的订单信息。
     var details = purchaseDetails as AppStorePurchaseDetails;
     Map<String, dynamic>? orderData;
     var orderNo = details.skPaymentTransaction.payment.applicationUsername;
