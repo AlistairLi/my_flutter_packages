@@ -53,4 +53,9 @@ class IapOrderModel {
       'currencySymbol': currencySymbol,
     };
   }
+
+  @override
+  String toString() {
+    return 'IapOrderModel{orderNo: $orderNo, purchaseID: $purchaseID, productId: $productId, price: $price, rawPrice: $rawPrice, currencyCode: $currencyCode, currencySymbol: $currencySymbol}';
+  }
 }

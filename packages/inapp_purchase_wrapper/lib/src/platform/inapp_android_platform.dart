@@ -1,7 +1,7 @@
 import 'package:inapp_purchase_wrapper/inapp_purchase_wrapper.dart';
 import 'package:inapp_purchase_wrapper/src/platform/i_inapp_platform.dart';
 
-class InAppAndroidPlatform implements IInAppPlatform {
+class InAppAndroidPlatform extends IInAppPlatform {
   @override
   PurchaseParam createPurchaseParam(
       {required ProductDetails productDetails,
@@ -10,6 +10,26 @@ class InAppAndroidPlatform implements IInAppPlatform {
       productDetails: productDetails,
       applicationUserName: applicationUserName,
     );
+  }
+
+  @override
+  String getProductDetailsInfo(ProductDetails productDetails) {
+    var buffer = getProductDetailsBuffer(productDetails);
+    if (productDetails is GooglePlayProductDetails) {
+      var detailsWrapper = productDetails.productDetails;
+      buffer.write(', productType: ${detailsWrapper.productType.name}');
+      buffer.write(', name: ${detailsWrapper.name}');
+      var oneTimeDetails = detailsWrapper.oneTimePurchaseOfferDetails;
+      if (oneTimeDetails != null) {
+        buffer.write(
+            ', OneTimePurchaseOfferDetailsWrapper{formattedPrice: ${oneTimeDetails.formattedPrice}');
+        buffer
+            .write(', priceAmountMicros: ${oneTimeDetails.priceAmountMicros}');
+        buffer
+            .write(', priceCurrencyCode: ${oneTimeDetails.priceCurrencyCode}}');
+      }
+    }
+    return buffer.toString();
   }
 
   @override

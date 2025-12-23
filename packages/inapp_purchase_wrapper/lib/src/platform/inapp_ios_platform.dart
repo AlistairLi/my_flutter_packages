@@ -2,7 +2,7 @@ import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:inapp_purchase_wrapper/inapp_purchase_wrapper.dart';
 import 'package:inapp_purchase_wrapper/src/platform/i_inapp_platform.dart';
 
-class InAppIOSPlatform implements IInAppPlatform {
+class InAppIOSPlatform extends IInAppPlatform {
   @override
   PurchaseParam createPurchaseParam(
       {required ProductDetails productDetails,
@@ -11,6 +11,19 @@ class InAppIOSPlatform implements IInAppPlatform {
       productDetails: productDetails,
       applicationUserName: applicationUserName,
     );
+  }
+
+  @override
+  String getProductDetailsInfo(ProductDetails productDetails) {
+    var buffer = getProductDetailsBuffer(productDetails);
+    if (productDetails is AppStoreProductDetails) {
+      var skProduct = productDetails.skProduct;
+      buffer.write(', productIdentifier: ${skProduct.productIdentifier}');
+      buffer.write(', localizedTitle: ${skProduct.localizedTitle}');
+      buffer.write(', localizedDescription: ${skProduct.localizedDescription}');
+      buffer.write(', price: ${skProduct.price}');
+    }
+    return buffer.toString();
   }
 
   @override

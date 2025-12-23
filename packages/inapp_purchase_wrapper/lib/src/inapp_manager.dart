@@ -238,7 +238,8 @@ class InAppManager {
         'buyConsumable_result',
         productId: productId,
         orderNo: orderNo,
-        errorMsg: "buyConsumable result: $result",
+        errorCode: "buyConsumable result: $result",
+        errorMsg: _inAppPlatform.getProductDetailsInfo(productDetails),
       );
       return result;
     } catch (e) {
