@@ -29,3 +29,7 @@
 ## 1.0.7
 
 - Add tracking data.
+
+## 1.0.8
+
+- Optimize.

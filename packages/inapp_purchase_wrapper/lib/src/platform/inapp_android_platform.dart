@@ -1,3 +1,4 @@
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:inapp_purchase_wrapper/inapp_purchase_wrapper.dart';
 import 'package:inapp_purchase_wrapper/src/platform/i_inapp_platform.dart';
 
@@ -33,10 +34,9 @@ class InAppAndroidPlatform extends IInAppPlatform {
   }
 
   @override
-  Future<VerifyResult> verifyPurchase(
+  Future<IapOrderModel?> getOrderModel(
       {required IInAppStorage storage,
-      required PurchaseDetails purchaseDetails,
-      required IInAppVerifier verifier}) async {
+      required PurchaseDetails purchaseDetails}) async {
     var details = purchaseDetails as GooglePlayPurchaseDetails;
     Map<String, dynamic>? orderData;
     var orderNo = details.billingClientPurchase.obfuscatedAccountId;
@@ -46,16 +46,12 @@ class InAppAndroidPlatform extends IInAppPlatform {
     } else if (purchaseID != null && purchaseID.isNotEmpty) {
       orderData = await storage.getOrderDataFromPurId(purchaseID);
     } else {
-      return VerifyResult.invalid(
-          errorMsg:
-              "orderNo and purchaseID is empty on verifyPurchase() on GP.");
+      return null;
     }
 
     if ((orderData == null || orderData.isEmpty) &&
         (orderNo == null || orderNo.isEmpty)) {
-      return VerifyResult.invalid(
-          errorMsg:
-              "orderData and orderNo is empty on verifyPurchase() on GP.");
+      return null;
     }
 
     var orderModel = GooglePlayOrderModel.fromJson(orderData ?? {});
@@ -66,9 +62,49 @@ class InAppAndroidPlatform extends IInAppPlatform {
     orderModel.purchaseID = details.purchaseID;
     orderModel.originalJson = details.billingClientPurchase.originalJson;
     orderModel.signature = details.billingClientPurchase.signature;
+    return orderModel;
+  }
 
+  @override
+  Future<VerifyResult> verifyPurchase(
+      {required IInAppStorage storage,
+      required IapOrderModel? orderModel,
+      required IInAppVerifier verifier}) async {
+    if (orderModel == null) {
+      return VerifyResult.invalid(
+        errorMsg: "orderModel is null on verifyPurchase() on GP.",
+      );
+    }
     await storage.updateOrderData(orderModel.orderNo, orderModel.toJson());
 
     return verifier.verify(orderModel);
+  }
+
+  @override
+  Future<void> completePurchase(
+    InAppPurchase inAppPurchase,
+    PurchaseDetails purchaseDetails, {
+    bool? autoConsume,
+    IIAPLogger? logger,
+  }) async {
+    if (autoConsume != true) {
+      final InAppPurchaseAndroidPlatformAddition androidAddition = inAppPurchase
+          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+      var resultWrapper =
+          await androidAddition.consumePurchase(purchaseDetails);
+      if (resultWrapper.responseCode != BillingResponse.ok) {
+        // 埋点上报
+        logger?.log(
+          'consume_order_failed',
+          productId: purchaseDetails.productID,
+          errorCode: resultWrapper.responseCode.name,
+          errorMsg:
+              'consumePurchase failed with responseCode: ${resultWrapper.responseCode} on GP.',
+        );
+      }
+    }
+    if (purchaseDetails.pendingCompletePurchase) {
+      await inAppPurchase.completePurchase(purchaseDetails);
+    }
   }
 }

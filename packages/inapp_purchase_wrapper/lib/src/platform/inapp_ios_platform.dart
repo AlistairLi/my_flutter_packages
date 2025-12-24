@@ -27,10 +27,9 @@ class InAppIOSPlatform extends IInAppPlatform {
   }
 
   @override
-  Future<VerifyResult> verifyPurchase(
+  Future<IapOrderModel?> getOrderModel(
       {required IInAppStorage storage,
-      required PurchaseDetails purchaseDetails,
-      required IInAppVerifier verifier}) async {
+      required PurchaseDetails purchaseDetails}) async {
     // 注意，iOS在补单时（调用InAppPurchase.instance.restorePurchases()），
     // 不能通过透传从details 拿到orderNo，需要通过purchaseID获取本地的订单信息。
     var details = purchaseDetails as AppStorePurchaseDetails;
@@ -42,16 +41,12 @@ class InAppIOSPlatform extends IInAppPlatform {
     } else if (purchaseID != null && purchaseID.isNotEmpty) {
       orderData = await storage.getOrderDataFromPurId(purchaseID);
     } else {
-      return VerifyResult.invalid(
-          errorMsg:
-              "orderNo and purchaseID is empty on verifyPurchase() on iOS.");
+      return null;
     }
 
     if ((orderData == null || orderData.isEmpty) &&
         (orderNo == null || orderNo.isEmpty)) {
-      return VerifyResult.invalid(
-          errorMsg:
-              "orderData and orderNo is empty on verifyPurchase() on iOS.");
+      return null;
     }
 
     var orderModel = AppStoreOrderModel.fromJson(orderData ?? {});
@@ -62,9 +57,33 @@ class InAppIOSPlatform extends IInAppPlatform {
     orderModel.purchaseID = details.purchaseID;
     orderModel.serverVerificationData =
         details.verificationData.serverVerificationData;
+    return orderModel;
+  }
 
+  @override
+  Future<VerifyResult> verifyPurchase(
+      {required IInAppStorage storage,
+      required IapOrderModel? orderModel,
+      required IInAppVerifier verifier}) async {
+    if (orderModel == null) {
+      return VerifyResult.invalid(
+        errorMsg: 'orderModel is null on verifyPurchase() on iOS.',
+      );
+    }
     await storage.updateOrderData(orderModel.orderNo, orderModel.toJson());
 
     return verifier.verify(orderModel);
+  }
+
+  @override
+  Future<void> completePurchase(
+    InAppPurchase inAppPurchase,
+    PurchaseDetails purchaseDetails, {
+    bool? autoConsume,
+    IIAPLogger? logger,
+  }) async {
+    if (purchaseDetails.pendingCompletePurchase) {
+      await inAppPurchase.completePurchase(purchaseDetails);
+    }
   }
 }

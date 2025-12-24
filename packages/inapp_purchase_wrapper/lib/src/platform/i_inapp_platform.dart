@@ -8,10 +8,22 @@ abstract class IInAppPlatform {
 
   String getProductDetailsInfo(ProductDetails productDetails);
 
-  Future<VerifyResult> verifyPurchase({
+  Future<IapOrderModel?> getOrderModel({
     required IInAppStorage storage,
     required PurchaseDetails purchaseDetails,
+  });
+
+  Future<VerifyResult> verifyPurchase({
+    required IInAppStorage storage,
+    required IapOrderModel? orderModel,
     required IInAppVerifier verifier,
+  });
+
+  Future<void> completePurchase(
+    InAppPurchase inAppPurchase,
+    PurchaseDetails purchaseDetails, {
+    bool? autoConsume,
+    IIAPLogger? logger,
   });
 
   StringBuffer getProductDetailsBuffer(ProductDetails productDetails) {

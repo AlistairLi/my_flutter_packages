@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:inapp_purchase_wrapper/inapp_purchase_wrapper.dart';
 import 'package:inapp_purchase_wrapper/src/platform/i_inapp_platform.dart';
+import 'package:inapp_purchase_wrapper/src/storage/inapp_storage_wrapper.dart';
 
 /// 内购工具类
 ///
@@ -20,7 +21,15 @@ class InAppManager {
   // 在 iOS 上必须启用自动消耗（auto-consume）。
   // To try without auto-consume on another platform, change `true` to `false` here.
   // ignore: no_literal_bool_comparisons
-  final bool _kAutoConsume = Platform.isIOS || true;
+  bool _kAutoConsume = Platform.isIOS || true;
+
+  /// 设置自动消耗
+  /// 注意：非必要不要设置该值，设置了也不要频繁更改，否则可能会影响到补单。
+  set kAutoConsume(bool value) {
+    if (!Platform.isIOS) {
+      _kAutoConsume = value;
+    }
+  }
 
   final IInAppPlatform _inAppPlatform;
 
@@ -30,7 +39,8 @@ class InAppManager {
   /// 商品验单
   final IInAppVerifier _inAppVerifier;
 
-  final IInAppStorage _inAppStorage;
+  /// 带内存缓存的存储包装器
+  final InAppStorageWrapper _inAppStorage;
 
   /// 日志回调
   final IIAPLogger? _logger;
@@ -43,7 +53,7 @@ class InAppManager {
   })  : _inAppPlatform =
             Platform.isAndroid ? InAppAndroidPlatform() : InAppIOSPlatform(),
         _paymentListener = paymentListener,
-        _inAppStorage = inAppStorage,
+        _inAppStorage = InAppStorageWrapper(inAppStorage, logger),
         _inAppVerifier = inAppVerifier,
         _logger = logger;
 
@@ -56,13 +66,14 @@ class InAppManager {
     }, onDone: () {
       // _purchaseSubscription?.cancel();
       _log(
-        'purchase_listen_onDone',
-        errorMsg: 'Internal purchase monitoring complete',
+        'purchase_listen',
+        errorMsg: 'onDone, Internal purchase monitoring complete',
       );
     }, onError: (error) {
       _log(
-        'purchase_listen_onError',
-        errorMsg: error.toString(),
+        'purchase_listen',
+        errorCode: '-1',
+        errorMsg: 'error: ${error.toString()}',
       );
     });
   }
@@ -85,20 +96,30 @@ class InAppManager {
     _productDetailsCache.clear();
   }
 
+  /// 清空订单内存缓存（用于登出等场景）
+  void clearOrderMemoryCache() {
+    _inAppStorage.clearMemoryCache();
+  }
+
   /// 向商店请求商品详情
   Future<List<ProductDetails>> _loadProductDetails({
     required List<String> productIds,
     String? orderNo,
     bool needCheckAvailable = true,
   }) async {
+    _log(
+      'review_order',
+      productId: productIds.toString(),
+    );
     if (needCheckAvailable) {
       final bool available = await _inAppPurchase.isAvailable();
       if (!available) {
-        _onError(
-          source: "isAvailable",
+        _log(
+          "review_order_resp",
           productId: productIds.toString(),
           orderNo: orderNo,
-          errorMsg: "available is $available, on loadProductDetails()",
+          errorCode: '-1',
+          errorMsg: "error: InAppPurchase.isAvailable: $available",
         );
         return [];
       }
@@ -108,24 +129,35 @@ class InAppManager {
         await _inAppPurchase.queryProductDetails(productIds.toSet());
 
     if (response.error != null) {
-      _onError(
-        source: "queryProductDetails",
+      _log(
+        "review_order_resp",
         productId: productIds.toString(),
         orderNo: orderNo,
-        errorMsg: response.error?.toString(),
+        errorCode: '-1',
+        errorMsg: 'error: ${response.error?.toString()}',
       );
       return [];
     }
 
     if (response.productDetails.isEmpty) {
-      _onError(
-        source: "queryProductDetails",
+      _log(
+        "review_order_resp",
         productId: productIds.toString(),
         orderNo: orderNo,
-        errorMsg: "productDetails is empty",
+        errorCode: '-1',
+        errorMsg: "error: ProductDetailsResponse.productDetails is empty",
       );
       return [];
     }
+
+    var ids = response.productDetails.map((e) => e.id).toList();
+    _log(
+      "review_order_resp",
+      productId: productIds.toString(),
+      orderNo: orderNo,
+      errorMsg: "success, productIds: ${ids.toString()}",
+    );
+
     return response.productDetails;
   }
 
@@ -148,19 +180,19 @@ class InAppManager {
   Future<bool> startPurchase(String? productId, String? orderNo) async {
     if (productId == null || productId.isEmpty) {
       _onError(
-        source: "checkProductId",
+        event: "launch_pay",
         productId: productId,
         orderNo: orderNo,
-        errorMsg: "productId is empty",
+        errorMsg: "error: productId is empty",
       );
       return false;
     }
     if (orderNo == null || orderNo.isEmpty) {
       _onError(
-        source: "checkOrderNo",
+        event: "launch_pay",
         productId: productId,
         orderNo: orderNo,
-        errorMsg: "orderNo is empty",
+        errorMsg: "error: orderNo is empty",
       );
       return false;
     }
@@ -169,10 +201,10 @@ class InAppManager {
     final bool available = await _inAppPurchase.isAvailable();
     if (!available) {
       _onError(
-        source: "isAvailable",
+        event: "launch_pay",
         productId: productId,
         orderNo: orderNo,
-        errorMsg: "available is $available, on startPurchase()",
+        errorMsg: "error: InAppPurchase.isAvailable: $available",
       );
       return false;
     }
@@ -203,10 +235,10 @@ class InAppManager {
 
     if (productDetails == null) {
       _onError(
-        source: "checkProductDetails",
+        event: "launch_pay",
         productId: productId,
         orderNo: orderNo,
-        errorMsg: "product details is null",
+        errorMsg: "error: productDetails is null",
       );
       return false;
     }
@@ -235,22 +267,23 @@ class InAppManager {
       _inAppStorage.saveOrderData(orderNo, order.toJson());
 
       _log(
-        'buyConsumable_result',
+        'launch_pay',
         productId: productId,
         orderNo: orderNo,
-        errorCode: "buyConsumable result: $result",
-        errorMsg: _inAppPlatform.getProductDetailsInfo(productDetails),
+        errorCode: result ? "0" : "-1",
+        errorMsg:
+            "${result ? "success" : "failed"}, product details: ${_inAppPlatform.getProductDetailsInfo(productDetails)}",
       );
       return result;
     } catch (e) {
       _onError(
-        source: "buyConsumable_catch",
+        event: "launch_pay",
         productId: productId,
         orderNo: orderNo,
-        errorMsg: e.toString(),
+        errorMsg: "error: ${e.toString()}",
       );
-      return false;
     }
+    return false;
   }
 
   /// 处理购买更新
@@ -267,64 +300,62 @@ class InAppManager {
 
   /// 处理单个购买详情
   void _processPurchaseDetails(PurchaseDetails purchaseDetails) async {
+    var orderModel = await _inAppPlatform.getOrderModel(
+      storage: _inAppStorage,
+      purchaseDetails: purchaseDetails,
+    );
+    var iapError = purchaseDetails.error;
+    _log(
+      'launch_pay_resp',
+      productId: purchaseDetails.productID,
+      orderNo: orderModel?.orderNo,
+      errorCode: purchaseDetails.status.name,
+      errorMsg:
+          "purchaseID: ${purchaseDetails.purchaseID}${iapError != null ? ", ${iapError.toString()}" : ""}${orderModel != null ? ", ${orderModel.toString()}" : ""}",
+    );
+
     if (purchaseDetails.status == PurchaseStatus.pending) {
       // 等待中
       _paymentListener.onPending(purchaseDetails);
     } else {
       if (purchaseDetails.status == PurchaseStatus.error) {
         // 错误
-        var iapError = purchaseDetails.error;
-        _onError(
-          source: iapError?.source ?? "",
-          productId: purchaseDetails.productID,
-          errorCode: iapError?.code,
-          errorMsg: iapError?.message,
-          details: purchaseDetails,
+        _paymentListener.onError(
+          IAPError(
+            source: 'launch_pay_resp',
+            code: iapError?.code ?? '',
+            message: iapError?.message ?? '',
+            details: purchaseDetails,
+          ),
         );
-
-        if (purchaseDetails.pendingCompletePurchase) {
-          _completePurchase(purchaseDetails, purchaseDetails.status);
-        }
       } else if (purchaseDetails.status == PurchaseStatus.canceled) {
         // 取消
-        _onCanceled(purchaseDetails);
-
-        if (purchaseDetails.pendingCompletePurchase) {
-          _completePurchase(purchaseDetails, purchaseDetails.status);
-        }
+        _paymentListener.onCanceled(purchaseDetails);
       } else if (purchaseDetails.status == PurchaseStatus.purchased ||
           purchaseDetails.status == PurchaseStatus.restored) {
-        var result = await _verifyPurchase(purchaseDetails);
+        var result = await _verifyPurchase(purchaseDetails, orderModel);
+
         if (result.isValid) {
           _deliverProduct(result.orderModel);
-
-          // 只有服务器校验通过并下发商品后，才调用 completePurchase 结束 App Store/Google Play 的事务
-          if (purchaseDetails.pendingCompletePurchase) {
-            _completePurchase(purchaseDetails, purchaseDetails.status);
-          }
         } else {
           _handleInvalidPurchase(purchaseDetails, result);
-        }
-
-        // 补单上报埋点
-        if (purchaseDetails.status == PurchaseStatus.restored) {
-          _log(
-            'restore_purchase',
-            productId: purchaseDetails.productID,
-            orderNo: result.orderModel.orderNo,
-            errorMsg: "restore purchase statistics",
-          );
+          return;
         }
       }
+
+      _completePurchase(purchaseDetails, orderModel?.orderNo);
     }
   }
 
-  Future<VerifyResult> _verifyPurchase(PurchaseDetails purchaseDetails) async {
+  Future<VerifyResult> _verifyPurchase(
+    PurchaseDetails purchaseDetails,
+    IapOrderModel? orderModel,
+  ) async {
     VerifyResult verifyResult;
     try {
       verifyResult = await _inAppPlatform.verifyPurchase(
         storage: _inAppStorage,
-        purchaseDetails: purchaseDetails,
+        orderModel: orderModel,
         verifier: _inAppVerifier,
       );
     } catch (e) {
@@ -332,46 +363,42 @@ class InAppManager {
         isValid: false,
         errorCode: "-1",
         errorMsg: e.toString(),
-        orderModel: IapOrderModel(),
+        orderModel: IapOrderModel(
+          productId: purchaseDetails.productID,
+          purchaseID: purchaseDetails.purchaseID,
+        ),
       );
     }
     return verifyResult;
   }
 
   void _deliverProduct(IapOrderModel orderModel) {
-    try {
-      _inAppStorage.removeOrder(orderModel.orderNo);
-    } catch (e) {
-      _log(
-        'remove_order_catch',
-        productId: orderModel.productId,
-        orderNo: orderModel.orderNo,
-        errorCode: "-1",
-        errorMsg: e.toString(),
-      );
-    }
+    _inAppStorage.removeOrder(orderModel.orderNo);
 
     try {
-      _onSuccess(orderModel);
+      _paymentListener.onSuccess(orderModel);
     } catch (e) {
       _log(
-        'on_success_catch',
+        'on_success',
         productId: orderModel.productId,
         orderNo: orderModel.orderNo,
         errorCode: "-1",
-        errorMsg: e.toString(),
+        errorMsg: "error: ${e.toString()}",
       );
     }
   }
 
   void _handleInvalidPurchase(
-      PurchaseDetails purchaseDetails, VerifyResult result) {
+    PurchaseDetails purchaseDetails,
+    VerifyResult result,
+  ) {
     _onError(
-      source: "verifyPurchaseFailed",
+      event: "verify_order_failed",
       productId: purchaseDetails.productID,
       orderNo: result.orderModel.orderNo,
       errorCode: result.errorCode,
-      errorMsg: result.errorMsg,
+      errorMsg:
+          "purchaseStatus: ${purchaseDetails.status.name}, purchaseID: ${purchaseDetails.purchaseID}, error: ${result.errorMsg}",
       details: purchaseDetails,
     );
   }
@@ -379,16 +406,39 @@ class InAppManager {
   /// 完成购买
   Future<void> _completePurchase(
     PurchaseDetails purchaseDetails,
-    PurchaseStatus status,
+    String? orderNo,
   ) async {
+    var subMsg = "purchaseID: ${purchaseDetails.purchaseID}";
+
     try {
-      await _inAppPurchase.completePurchase(purchaseDetails);
+      _log(
+        'consume_order',
+        productId: purchaseDetails.productID,
+        orderNo: orderNo,
+        errorCode: purchaseDetails.status.name,
+        errorMsg: subMsg,
+      );
+
+      await _inAppPlatform.completePurchase(
+        _inAppPurchase,
+        purchaseDetails,
+        autoConsume: _kAutoConsume,
+        logger: _logger,
+      );
+
+      _log(
+        'consume_order_resp',
+        productId: purchaseDetails.productID,
+        orderNo: orderNo,
+        errorCode: purchaseDetails.status.name,
+        errorMsg: 'success, $subMsg',
+      );
     } catch (e) {
       _log(
-        'completePurchase_catch',
+        'consume_order_resp',
         productId: purchaseDetails.productID,
-        errorCode: "-1",
-        errorMsg: "purchaseStatus: ${status.name}, e: ${e.toString()}",
+        errorCode: purchaseDetails.status.name,
+        errorMsg: "error: ${e.toString()}, $subMsg",
       );
     }
   }
@@ -398,27 +448,31 @@ class InAppManager {
     try {
       _inAppPurchase.restorePurchases();
     } catch (e) {
-      _log('restorePurchases_catch', errorMsg: e.toString());
+      _log(
+        'restore_purchases',
+        errorCode: '-1',
+        errorMsg: "error: ${e.toString()}",
+      );
     }
   }
 
   void _onError(
-      {required String source,
+      {required String event,
       String? productId,
       String? orderNo,
       String? errorCode,
       String? errorMsg,
       dynamic details}) {
     _log(
-      "onError_$source",
+      event,
       productId: productId,
       orderNo: orderNo,
-      errorCode: errorCode,
+      errorCode: errorCode ?? '-1',
       errorMsg: errorMsg,
     );
     _paymentListener.onError(
       IAPError(
-        source: source,
+        source: event,
         code: errorCode ?? '',
         message: errorMsg ?? '',
         details: details,
@@ -426,26 +480,12 @@ class InAppManager {
     );
   }
 
-  void _onCanceled(PurchaseDetails purchaseDetails) {
-    _log(
-      'onCanceled_${purchaseDetails.error?.source ?? ''}',
-      productId: purchaseDetails.productID,
-      errorCode: purchaseDetails.error?.code ?? "",
-      errorMsg: purchaseDetails.error?.toString(),
-    );
-    _paymentListener.onCanceled(purchaseDetails);
-  }
-
-  void _onSuccess(IapOrderModel data) {
-    _paymentListener.onSuccess(data);
-  }
-
   /// 记录日志
   void _log(
     String event, {
     String? productId,
     String? orderNo,
-    String? errorCode,
+    String errorCode = "0",
     String? errorMsg,
   }) {
     _logger?.log(event,

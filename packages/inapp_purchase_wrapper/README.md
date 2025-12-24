@@ -4,6 +4,12 @@ A comprehensive wrapper for Flutter's in_app_purchase plugin that simplifies cro
 Android/iOS) in-app purchases with unified APIs for product purchasing, verification, and order
 management.
 
+notice：
+
+- Consumable Products Only: Currently only supports consumable in-app products, subscriptions are
+  not supported yet
+- iOS Flow Unverified: iOS implementation flow has not been fully validated yet
+
 ## Features
 
 - Cross-platform Support: Unified API for both Android and iOS in-app purchases
