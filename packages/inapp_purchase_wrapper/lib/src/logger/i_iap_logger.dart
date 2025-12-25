@@ -5,5 +5,7 @@ abstract class IIAPLogger {
     String? orderNo,
     String? errorCode,
     String? errorMsg,
+    String? uuid,
+    int? elapsedTime,
   });
 }

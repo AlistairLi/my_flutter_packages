@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:inapp_purchase_wrapper/inapp_purchase_wrapper.dart';
+import 'package:inapp_purchase_wrapper/src/enum/load_product_details_source.dart';
 import 'package:inapp_purchase_wrapper/src/platform/i_inapp_platform.dart';
 import 'package:inapp_purchase_wrapper/src/storage/inapp_storage_wrapper.dart';
+import 'package:uuid/uuid.dart';
 
 /// 内购工具类
 ///
@@ -87,6 +89,7 @@ class InAppManager {
   void preloadProductDetails(List<String> productIds) async {
     List<ProductDetails> productDetailsList = await _loadProductDetails(
       productIds: productIds,
+      source: LoadProductDetailsSource.preload,
     );
     _putProductDetails(productDetailsList);
   }
@@ -104,14 +107,24 @@ class InAppManager {
   /// 向商店请求商品详情
   Future<List<ProductDetails>> _loadProductDetails({
     required List<String> productIds,
+    required LoadProductDetailsSource source,
     String? orderNo,
-    bool needCheckAvailable = true,
   }) async {
+    String? uuid;
+    int? startTime;
+
+    if (source == LoadProductDetailsSource.preload) {
+      startTime = DateTime.now().millisecondsSinceEpoch;
+      uuid = const Uuid().v4();
+    }
+
     _log(
       'review_order',
       productId: productIds.toString(),
+      uuid: uuid,
+      elapsedTime: 0,
     );
-    if (needCheckAvailable) {
+    if (source == LoadProductDetailsSource.preload) {
       final bool available = await _inAppPurchase.isAvailable();
       if (!available) {
         _log(
@@ -120,6 +133,10 @@ class InAppManager {
           orderNo: orderNo,
           errorCode: '-1',
           errorMsg: "error: InAppPurchase.isAvailable: $available",
+          uuid: uuid,
+          elapsedTime: startTime != null
+              ? DateTime.now().millisecondsSinceEpoch - startTime
+              : null,
         );
         return [];
       }
@@ -135,6 +152,10 @@ class InAppManager {
         orderNo: orderNo,
         errorCode: '-1',
         errorMsg: 'error: ${response.error?.toString()}',
+        uuid: uuid,
+        elapsedTime: startTime != null
+            ? DateTime.now().millisecondsSinceEpoch - startTime
+            : null,
       );
       return [];
     }
@@ -146,6 +167,10 @@ class InAppManager {
         orderNo: orderNo,
         errorCode: '-1',
         errorMsg: "error: ProductDetailsResponse.productDetails is empty",
+        uuid: uuid,
+        elapsedTime: startTime != null
+            ? DateTime.now().millisecondsSinceEpoch - startTime
+            : null,
       );
       return [];
     }
@@ -155,7 +180,12 @@ class InAppManager {
       "review_order_resp",
       productId: productIds.toString(),
       orderNo: orderNo,
+      errorCode: '0',
       errorMsg: "success, productIds: ${ids.toString()}",
+      uuid: uuid,
+      elapsedTime: startTime != null
+          ? DateTime.now().millisecondsSinceEpoch - startTime
+          : null,
     );
 
     return response.productDetails;
@@ -218,8 +248,8 @@ class InAppManager {
       while (retryCount >= 0) {
         var productDetailList = await _loadProductDetails(
           productIds: [productId],
+          source: LoadProductDetailsSource.purchase,
           orderNo: orderNo,
-          needCheckAvailable: false,
         );
         _putProductDetails(productDetailList);
         productDetails = _getProductDetails(productId);
@@ -485,14 +515,20 @@ class InAppManager {
     String event, {
     String? productId,
     String? orderNo,
-    String errorCode = "0",
+    String? errorCode,
     String? errorMsg,
+    String? uuid,
+    int? elapsedTime,
   }) {
-    _logger?.log(event,
-        productId: productId,
-        orderNo: orderNo,
-        errorCode: errorCode,
-        errorMsg: errorMsg);
+    _logger?.log(
+      event,
+      productId: productId,
+      orderNo: orderNo,
+      errorCode: errorCode,
+      errorMsg: errorMsg,
+      uuid: uuid,
+      elapsedTime: elapsedTime,
+    );
   }
 
   /// 获取重试的延迟毫秒数

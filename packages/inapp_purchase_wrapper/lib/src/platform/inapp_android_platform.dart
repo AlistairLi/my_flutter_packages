@@ -37,32 +37,44 @@ class InAppAndroidPlatform extends IInAppPlatform {
   Future<IapOrderModel?> getOrderModel(
       {required IInAppStorage storage,
       required PurchaseDetails purchaseDetails}) async {
-    var details = purchaseDetails as GooglePlayPurchaseDetails;
-    Map<String, dynamic>? orderData;
-    var orderNo = details.billingClientPurchase.obfuscatedAccountId;
-    var purchaseID = details.purchaseID;
-    if (orderNo != null && orderNo.isNotEmpty) {
-      orderData = await storage.getOrderData(orderNo);
+    var purchaseID = purchaseDetails.purchaseID;
+    // 在 canceled等状态的订单，purchaseDetails 不是 GooglePlayPurchaseDetails
+    if (purchaseDetails is GooglePlayPurchaseDetails) {
+      Map<String, dynamic>? orderData;
+      var orderNo = purchaseDetails.billingClientPurchase.obfuscatedAccountId;
+      if (orderNo != null && orderNo.isNotEmpty) {
+        orderData = await storage.getOrderData(orderNo);
+      } else if (purchaseID != null && purchaseID.isNotEmpty) {
+        orderData = await storage.getOrderDataFromPurId(purchaseID);
+      } else {
+        return null;
+      }
+
+      if ((orderData == null || orderData.isEmpty) &&
+          (orderNo == null || orderNo.isEmpty)) {
+        return null;
+      }
+
+      var orderModel = GooglePlayOrderModel.fromJson(orderData ?? {});
+      if ((orderData == null || orderData.isEmpty) &&
+          (orderNo != null && orderNo.isNotEmpty)) {
+        orderModel.orderNo = orderNo;
+      }
+      orderModel.purchaseID = purchaseID;
+      orderModel.originalJson =
+          purchaseDetails.billingClientPurchase.originalJson;
+      orderModel.signature = purchaseDetails.billingClientPurchase.signature;
+      return orderModel;
     } else if (purchaseID != null && purchaseID.isNotEmpty) {
-      orderData = await storage.getOrderDataFromPurId(purchaseID);
-    } else {
-      return null;
+      Map<String, dynamic>? orderData =
+          await storage.getOrderDataFromPurId(purchaseID);
+      if (orderData == null || orderData.isEmpty) {
+        return null;
+      }
+      var orderModel = GooglePlayOrderModel.fromJson(orderData);
+      return orderModel;
     }
-
-    if ((orderData == null || orderData.isEmpty) &&
-        (orderNo == null || orderNo.isEmpty)) {
-      return null;
-    }
-
-    var orderModel = GooglePlayOrderModel.fromJson(orderData ?? {});
-    if ((orderData == null || orderData.isEmpty) &&
-        (orderNo != null && orderNo.isNotEmpty)) {
-      orderModel.orderNo = orderNo;
-    }
-    orderModel.purchaseID = details.purchaseID;
-    orderModel.originalJson = details.billingClientPurchase.originalJson;
-    orderModel.signature = details.billingClientPurchase.signature;
-    return orderModel;
+    return null;
   }
 
   @override
@@ -99,7 +111,7 @@ class InAppAndroidPlatform extends IInAppPlatform {
           productId: purchaseDetails.productID,
           errorCode: resultWrapper.responseCode.name,
           errorMsg:
-              'consumePurchase failed with responseCode: ${resultWrapper.responseCode} on GP.',
+              'consumePurchase failed on GP, purchaseID: ${purchaseDetails.purchaseID}',
         );
       }
     }

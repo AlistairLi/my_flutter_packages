@@ -30,34 +30,45 @@ class InAppIOSPlatform extends IInAppPlatform {
   Future<IapOrderModel?> getOrderModel(
       {required IInAppStorage storage,
       required PurchaseDetails purchaseDetails}) async {
+    var purchaseID = purchaseDetails.purchaseID;
     // 注意，iOS在补单时（调用InAppPurchase.instance.restorePurchases()），
     // 不能通过透传从details 拿到orderNo，需要通过purchaseID获取本地的订单信息。
-    var details = purchaseDetails as AppStorePurchaseDetails;
-    Map<String, dynamic>? orderData;
-    var orderNo = details.skPaymentTransaction.payment.applicationUsername;
-    var purchaseID = details.purchaseID;
-    if (orderNo != null && orderNo.isNotEmpty) {
-      orderData = await storage.getOrderData(orderNo);
+    if (purchaseDetails is AppStorePurchaseDetails) {
+      Map<String, dynamic>? orderData;
+      var orderNo =
+          purchaseDetails.skPaymentTransaction.payment.applicationUsername;
+      if (orderNo != null && orderNo.isNotEmpty) {
+        orderData = await storage.getOrderData(orderNo);
+      } else if (purchaseID != null && purchaseID.isNotEmpty) {
+        orderData = await storage.getOrderDataFromPurId(purchaseID);
+      } else {
+        return null;
+      }
+
+      if ((orderData == null || orderData.isEmpty) &&
+          (orderNo == null || orderNo.isEmpty)) {
+        return null;
+      }
+
+      var orderModel = AppStoreOrderModel.fromJson(orderData ?? {});
+      if ((orderData == null || orderData.isEmpty) &&
+          (orderNo != null && orderNo.isNotEmpty)) {
+        orderModel.orderNo = orderNo;
+      }
+      orderModel.purchaseID = purchaseID;
+      orderModel.serverVerificationData =
+          purchaseDetails.verificationData.serverVerificationData;
+      return orderModel;
     } else if (purchaseID != null && purchaseID.isNotEmpty) {
-      orderData = await storage.getOrderDataFromPurId(purchaseID);
-    } else {
-      return null;
+      Map<String, dynamic>? orderData =
+          await storage.getOrderDataFromPurId(purchaseID);
+      if (orderData == null || orderData.isEmpty) {
+        return null;
+      }
+      var orderModel = AppStoreOrderModel.fromJson(orderData);
+      return orderModel;
     }
-
-    if ((orderData == null || orderData.isEmpty) &&
-        (orderNo == null || orderNo.isEmpty)) {
-      return null;
-    }
-
-    var orderModel = AppStoreOrderModel.fromJson(orderData ?? {});
-    if ((orderData == null || orderData.isEmpty) &&
-        (orderNo != null && orderNo.isNotEmpty)) {
-      orderModel.orderNo = orderNo;
-    }
-    orderModel.purchaseID = details.purchaseID;
-    orderModel.serverVerificationData =
-        details.verificationData.serverVerificationData;
-    return orderModel;
+    return null;
   }
 
   @override
