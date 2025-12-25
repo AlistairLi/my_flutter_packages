@@ -37,3 +37,7 @@
 ## 1.0.9
 
 - Optimize.
+
+## 1.1.0
+
+- Optimize.

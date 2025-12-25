@@ -124,6 +124,22 @@ class InAppManager {
       uuid: uuid,
       elapsedTime: 0,
     );
+
+    if (productIds.isEmpty) {
+      _log(
+        "review_order_resp",
+        productId: productIds.toString(),
+        orderNo: orderNo,
+        errorCode: '-1',
+        errorMsg: 'error: parameter productIds is empty',
+        uuid: uuid,
+        elapsedTime: startTime != null
+            ? DateTime.now().millisecondsSinceEpoch - startTime
+            : null,
+      );
+      return [];
+    }
+
     if (source == LoadProductDetailsSource.preload) {
       final bool available = await _inAppPurchase.isAvailable();
       if (!available) {
@@ -193,6 +209,7 @@ class InAppManager {
 
   /// 将 List<ProductDetails> 缓存到 _productDetailsCache中
   void _putProductDetails(List<ProductDetails> productDetailsList) {
+    if (productDetailsList.isEmpty) return;
     for (var value in productDetailsList) {
       _productDetailsCache[value.id] = value;
     }
@@ -200,6 +217,7 @@ class InAppManager {
 
   /// 获取单个商品详情
   ProductDetails? _getProductDetails(String productId) {
+    if (productId.isEmpty) return null;
     return _productDetailsCache[productId];
   }
 
@@ -302,7 +320,7 @@ class InAppManager {
         orderNo: orderNo,
         errorCode: result ? "0" : "-1",
         errorMsg:
-            "${result ? "success" : "failed"}, product details: ${_inAppPlatform.getProductDetailsInfo(productDetails)}",
+            "${result ? "success" : "failed"}, autoConsume: $_kAutoConsume, product details: ${_inAppPlatform.getProductDetailsInfo(productDetails)}",
       );
       return result;
     } catch (e) {

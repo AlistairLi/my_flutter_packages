@@ -2,7 +2,10 @@ import 'package:inapp_purchase_wrapper/inapp_purchase_wrapper.dart';
 
 class InAppPurchaseListenerExample extends PaymentListener {
   @override
-  void onPending(PurchaseDetails purchaseDetails) {}
+  void onPending(PurchaseDetails purchaseDetails) {
+    // Loading.dismiss();
+    // toast("The purchase is pending, Please wait for the confirmation to be completed.");
+  }
 
   @override
   void onSuccess(IapOrderModel order) {

@@ -18,13 +18,20 @@ void main() {
     logger: IAPLoggerExample(),
   );
 
-  // 登录后启动监听
+  // App启动时启动监听
   inAppManager.init();
+
+  // 设置是否自动消耗
+  if (Platform.isAndroid) {
+    inAppManager.kAutoConsume = false;
+  }
 
   // 登录后启动恢复购买（补单）
   inAppManager.startRestorePurchases();
 
+  // 登录后预加载商店的商品详情
+  inAppManager.preloadProductDetails(["product_id_xx"]);
+
   // 购买
   inAppManager.startPurchase("product_id_xxx", "order_no_xxx");
-
 }
