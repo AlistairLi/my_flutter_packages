@@ -135,12 +135,113 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
     // 初始化每个一级tab的二级tab controller
     _secondLevelTabControllers =
         List.generate(widget.firstLevelTabs.length, (i) {
+      final secondLength = widget.secondLevelTabs[i].length;
+      if (secondLength == 0) return null;
+      final initialIndex = i == _currentFirstIndex
+          ? _currentSecondIndex.clamp(0, secondLength - 1)
+          : 0;
       return TabController(
         vsync: this,
-        length: widget.secondLevelTabs[i].length,
-        initialIndex: i == _currentFirstIndex ? _currentSecondIndex : 0,
+        length: secondLength,
+        initialIndex: initialIndex,
       )..addListener(() => _onSecondLevelTabChanged(i));
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant MultiTabView2<T, U> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final oldFirstLength = oldWidget.firstLevelTabs.length;
+    final newFirstLength = widget.firstLevelTabs.length;
+
+    // 检查一级 tabs 是否改变
+    if (oldFirstLength != newFirstLength) {
+      // 销毁旧的一级 controller
+      _firstLevelTabController.removeListener(_onFirstLevelTabChanged);
+      _firstLevelTabController.dispose();
+
+      // 销毁所有旧的二级 controllers
+      for (final c in _secondLevelTabControllers) {
+        c?.dispose();
+      }
+
+      // 确保当前索引在有效范围内
+      _currentFirstIndex = _currentFirstIndex.clamp(0, newFirstLength - 1);
+      if (newFirstLength == 0) {
+        _currentFirstIndex = 0;
+      }
+
+      // 创建新的一级 controller
+      _firstLevelTabController = TabController(
+        vsync: this,
+        length: newFirstLength,
+        initialIndex: newFirstLength > 0 ? _currentFirstIndex : 0,
+      );
+      _firstLevelTabController.addListener(_onFirstLevelTabChanged);
+
+      // 创建新的二级 controllers
+      _secondLevelTabControllers = List.generate(newFirstLength, (i) {
+        final secondLength = widget.secondLevelTabs[i].length;
+        if (secondLength == 0) return null;
+        return TabController(
+          vsync: this,
+          length: secondLength,
+          initialIndex: 0,
+        )..addListener(() => _onSecondLevelTabChanged(i));
+      });
+
+      // 更新二级索引
+      if (newFirstLength > 0 &&
+          _currentFirstIndex < _secondLevelTabControllers.length) {
+        _currentSecondIndex =
+            _secondLevelTabControllers[_currentFirstIndex]?.index ?? 0;
+      } else {
+        _currentSecondIndex = 0;
+      }
+    } else {
+      // 一级 tabs 长度相同，检查每个二级 tabs 是否改变
+      bool needRebuildSecond = false;
+      for (int i = 0; i < newFirstLength; i++) {
+        final oldSecondLength = oldWidget.secondLevelTabs[i].length;
+        final newSecondLength = widget.secondLevelTabs[i].length;
+        if (oldSecondLength != newSecondLength) {
+          needRebuildSecond = true;
+          break;
+        }
+      }
+
+      if (needRebuildSecond) {
+        // 销毁所有旧的二级 controllers
+        for (final c in _secondLevelTabControllers) {
+          c?.dispose();
+        }
+
+        // 创建新的二级 controllers
+        _secondLevelTabControllers = List.generate(newFirstLength, (i) {
+          final secondLength = widget.secondLevelTabs[i].length;
+          if (secondLength == 0) return null;
+
+          // 保留当前一级 tab 的二级索引（如果有效）
+          int initialIndex = 0;
+          if (i == _currentFirstIndex) {
+            initialIndex = _currentSecondIndex.clamp(0, secondLength - 1);
+          }
+
+          return TabController(
+            vsync: this,
+            length: secondLength,
+            initialIndex: initialIndex,
+          )..addListener(() => _onSecondLevelTabChanged(i));
+        });
+
+        // 更新二级索引
+        if (_currentFirstIndex < _secondLevelTabControllers.length) {
+          final controller = _secondLevelTabControllers[_currentFirstIndex];
+          _currentSecondIndex = controller?.index ?? 0;
+        }
+      }
+    }
   }
 
   @override
@@ -276,8 +377,11 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
       children: List.generate(widget.firstLevelTabs.length, (firstIndex) {
         final firstTab = widget.firstLevelTabs[firstIndex];
         final secondTabs = widget.secondLevelTabs[firstIndex];
-        final secondController = _secondLevelTabControllers[firstIndex]!;
-        if (secondTabs.length > 1 &&
+        final secondController = _secondLevelTabControllers[firstIndex];
+
+        // 需要二级 controller 且存在多个二级 tabs
+        if (secondController != null &&
+            secondTabs.length > 1 &&
             widget.shouldShowSecondLevel?.call(secondTabs) == true) {
           return Column(children: [
             _buildSecondLevelTabBar(firstIndex),
@@ -296,7 +400,7 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
               ),
             ),
           ]);
-        } else if (secondTabs.length == 1) {
+        } else if (secondTabs.isNotEmpty) {
           return widget.contentBuilder(
             firstIndex,
             0,
@@ -315,7 +419,10 @@ class _MultiTabView2State<T, U> extends State<MultiTabView2<T, U>>
 
     final style =
         widget.secondLevelStyle ?? TabStyleConfig2.defaultSecondLevel();
-    final controller = _secondLevelTabControllers[firstIndex]!;
+    final controller = _secondLevelTabControllers[firstIndex];
+    if (controller == null) {
+      return const SizedBox.shrink();
+    }
 
     Widget current = TabBar(
       controller: controller,

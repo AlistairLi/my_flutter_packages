@@ -65,3 +65,7 @@
 ## 1.1.6
 
 - Optimize MultiTabView2.
+
+## 1.1.7
+
+- Fix the issues of MultiTabView2.
