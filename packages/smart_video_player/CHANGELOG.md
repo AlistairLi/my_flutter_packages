@@ -74,3 +74,7 @@
 ## 1.1.9
 
 - Fixed bug.
+
+## 1.2.0
+
+- Added LocalVideoServer for streaming video data from memory.

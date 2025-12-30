@@ -49,6 +49,14 @@ A simple video player widget for Flutter applications with enhanced playback con
 - Ensures proper initialization and cleanup, including removing listeners when the widget is
   disposed of.
 
+### 9. **Local Video Server**
+
+- Includes LocalVideoServer class for streaming video data directly from memory
+- Avoids saving video files to disk by serving content through HTTP
+- Supports range requests for video seeking functionality
+- Provides automatic port detection with fallback mechanisms
+- Includes memory management for efficient video caching
+
 In summary, the `SmartVideoPlayer` is a flexible and interactive video player that supports various
 video sources, controls playback, manages audio, and integrates visibility detection for a seamless
 user experience.
