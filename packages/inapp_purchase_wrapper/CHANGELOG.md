@@ -41,3 +41,7 @@
 ## 1.1.0
 
 - Optimize.
+
+## 1.1.1
+
+- IapOrderModel has added new parameters.

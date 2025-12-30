@@ -7,7 +7,7 @@ class InAppIOSPlatform extends IInAppPlatform {
   PurchaseParam createPurchaseParam(
       {required ProductDetails productDetails,
       required String applicationUserName}) {
-    return AppStorePurchaseParam(
+    return PurchaseParam(
       productDetails: productDetails,
       applicationUserName: applicationUserName,
     );

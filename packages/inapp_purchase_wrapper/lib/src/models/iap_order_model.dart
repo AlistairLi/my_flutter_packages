@@ -20,6 +20,9 @@ class IapOrderModel {
   /// 币种符号, eg: $
   String? currencySymbol;
 
+  /// 美元价格
+  double? uPrice;
+
   IapOrderModel({
     this.orderNo = "",
     this.purchaseID,
@@ -28,6 +31,7 @@ class IapOrderModel {
     this.rawPrice,
     this.currencyCode,
     this.currencySymbol,
+    this.uPrice,
   });
 
   factory IapOrderModel.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,7 @@ class IapOrderModel {
       rawPrice: json['rawPrice'],
       currencyCode: json['currencyCode'],
       currencySymbol: json['currencySymbol'],
+      uPrice: json['uPrice'],
     );
   }
 
@@ -51,11 +56,12 @@ class IapOrderModel {
       'rawPrice': rawPrice,
       'currencyCode': currencyCode,
       'currencySymbol': currencySymbol,
+      'uPrice': uPrice,
     };
   }
 
   @override
   String toString() {
-    return 'IapOrderModel{orderNo: $orderNo, purchaseID: $purchaseID, productId: $productId, price: $price, rawPrice: $rawPrice, currencyCode: $currencyCode, currencySymbol: $currencySymbol}';
+    return 'IapOrderModel{orderNo: $orderNo, purchaseID: $purchaseID, productId: $productId, price: $price, rawPrice: $rawPrice, currencyCode: $currencyCode, currencySymbol: $currencySymbol, uPrice: $uPrice}';
   }
 }

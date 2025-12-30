@@ -225,7 +225,12 @@ class InAppManager {
   ///
   /// [productId] 商品 code
   /// [orderNo] 订单号
-  Future<bool> startPurchase(String? productId, String? orderNo) async {
+  /// [uPrice] 美元价格
+  Future<bool> startPurchase({
+    required String? productId,
+    required String? orderNo,
+    double? uPrice,
+  }) async {
     if (productId == null || productId.isEmpty) {
       _onError(
         event: "launch_pay",
@@ -311,6 +316,7 @@ class InAppManager {
         rawPrice: productDetails.rawPrice,
         currencyCode: productDetails.currencyCode,
         currencySymbol: productDetails.currencySymbol,
+        uPrice: uPrice,
       );
       _inAppStorage.saveOrderData(orderNo, order.toJson());
 

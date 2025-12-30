@@ -7,7 +7,7 @@ class InAppAndroidPlatform extends IInAppPlatform {
   PurchaseParam createPurchaseParam(
       {required ProductDetails productDetails,
       required String applicationUserName}) {
-    return GooglePlayPurchaseParam(
+    return PurchaseParam(
       productDetails: productDetails,
       applicationUserName: applicationUserName,
     );

@@ -33,5 +33,9 @@ void main() {
   inAppManager.preloadProductDetails(["product_id_xx"]);
 
   // 购买
-  inAppManager.startPurchase("product_id_xxx", "order_no_xxx");
+  inAppManager.startPurchase(
+    productId: "product_id_xxx",
+    orderNo: "order_no_xxx",
+    uPrice: 1.99,
+  );
 }
