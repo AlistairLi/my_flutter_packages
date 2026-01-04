@@ -3,4 +3,9 @@
 - Initial version.
 
 ## 1.0.1
-- Modification log printing
+
+- Modification log printing.
+
+## 1.0.2
+
+- New callback.

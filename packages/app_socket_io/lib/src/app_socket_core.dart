@@ -8,7 +8,6 @@ import 'package:socket_io_client/socket_io_client.dart' as client;
 import 'config/socket_config.dart';
 
 class AppSocketCore {
-
   /// 默认支持的传输方式
   final defaultTransports = <String>[
     'websocket',
@@ -281,7 +280,7 @@ class AppSocketCore {
       if (kDebugMode) {
         print('[AppSocketCore] Socket connect error: $data');
       }
-      _eventManager.notifyError(data);
+      _eventManager.notifyConnectError(data);
       _coreSocket?.disconnect();
     });
 
@@ -290,7 +289,7 @@ class AppSocketCore {
       if (kDebugMode) {
         print('[AppSocketCore] Socket connect timeout');
       }
-      _eventManager.notifyTimeout(data);
+      _eventManager.notifyConnectTimeout(data);
     });
   }
 

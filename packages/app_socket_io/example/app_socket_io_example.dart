@@ -205,7 +205,7 @@ class _SocketExamplePageState extends State<SocketExamplePage>
   }
 
   @override
-  void onTimeout(Object? data) {
+  void onConnectTimeout(Object? data) {
     setState(() {
       _status = '连接超时';
     });
@@ -230,5 +230,10 @@ class _SocketExamplePageState extends State<SocketExamplePage>
   @override
   void onReconnectFailed() {
     _addMessage('❌ 重连失败');
+  }
+
+  @override
+  void onConnectError(Object? data) {
+    // TODO: implement onConnectError
   }
 }

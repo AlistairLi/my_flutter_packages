@@ -1,5 +1,3 @@
-
-
 /// Socket事件监听器接口
 abstract class SocketEventListener {
   /// 连接成功
@@ -12,10 +10,13 @@ abstract class SocketEventListener {
   void onDisconnected(Object? data);
 
   /// 连接错误
-  void onError(Object? data);
+  void onConnectError(Object? data);
 
   /// 连接超时
-  void onTimeout(Object? data);
+  void onConnectTimeout(Object? data);
+
+  /// 错误
+  void onError(Object? data);
 
   /// 收到消息
   void onMessage(String event, Object? data);
@@ -48,12 +49,17 @@ class DefaultSocketEventListener implements SocketEventListener {
   }
 
   @override
-  void onError(Object? data) {
+  void onConnectError(Object? data) {
+    // TODO: implement onConnectError
+  }
+
+  @override
+  void onConnectTimeout(Object? data) {
     // 默认实现为空，子类可以重写
   }
 
   @override
-  void onTimeout(Object? data) {
+  void onError(Object? data) {
     // 默认实现为空，子类可以重写
   }
 
@@ -121,16 +127,23 @@ class SocketEventListenerManager {
   }
 
   /// 通知连接错误
-  void notifyError(Object? data) {
+  void notifyConnectError(Object? data) {
     for (final listener in _listeners) {
-      listener.onError(data);
+      listener.onConnectError(data);
     }
   }
 
   /// 通知连接超时
-  void notifyTimeout(Object? data) {
+  void notifyConnectTimeout(Object? data) {
     for (final listener in _listeners) {
-      listener.onTimeout(data);
+      listener.onConnectTimeout(data);
+    }
+  }
+
+  /// 通知错误
+  void notifyError(Object? data) {
+    for (final listener in _listeners) {
+      listener.onError(data);
     }
   }
 
