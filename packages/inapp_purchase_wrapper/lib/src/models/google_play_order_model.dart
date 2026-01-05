@@ -12,6 +12,7 @@ class GooglePlayOrderModel extends IapOrderModel {
     super.rawPrice,
     super.currencyCode,
     super.currencySymbol,
+    super.uPrice,
     required this.originalJson,
     required this.signature,
   });
@@ -26,6 +27,7 @@ class GooglePlayOrderModel extends IapOrderModel {
       rawPrice: parent.rawPrice,
       currencyCode: parent.currencyCode,
       currencySymbol: parent.currencySymbol,
+      uPrice: parent.uPrice,
       originalJson: json['originalJson'] ?? '',
       signature: json['signature'],
     );

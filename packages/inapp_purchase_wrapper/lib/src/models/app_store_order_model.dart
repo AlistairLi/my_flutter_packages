@@ -11,6 +11,7 @@ class AppStoreOrderModel extends IapOrderModel {
     required super.rawPrice,
     required super.currencyCode,
     required super.currencySymbol,
+    required super.uPrice,
     required this.serverVerificationData,
   });
 
@@ -24,6 +25,7 @@ class AppStoreOrderModel extends IapOrderModel {
       rawPrice: parent.rawPrice,
       currencyCode: parent.currencyCode,
       currencySymbol: parent.currencySymbol,
+      uPrice: parent.uPrice,
       serverVerificationData: json['serverVerificationData'] ?? '',
     );
   }

@@ -45,3 +45,7 @@
 ## 1.1.1
 
 - IapOrderModel has added new parameters.
+
+## 1.1.2
+
+- Fixed bug.
