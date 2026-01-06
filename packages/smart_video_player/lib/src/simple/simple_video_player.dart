@@ -139,6 +139,7 @@ class _SmartVideoPlayerState extends State<SimpleVideoPlayer>
       looping: widget.looping,
       showControls: false,
     );
+    _chewieController?.setVolume(widget.volume);
     widget.controller?.attachPlayer(_chewieController);
   }
 
