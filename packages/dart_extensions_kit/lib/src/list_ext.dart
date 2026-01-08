@@ -34,6 +34,45 @@ extension ListExtensions<T> on List<T> {
     return where((element) => seen.add(keySelector(element))).toList();
   }
 
+  /// 提取属性列表
+  ///
+  /// - selector: 指定获取的属性
+  /// - distinct: 是否去重（默认 true）
+  /// - ignoreNull: 是否忽略 null（默认 true）
+  /// - ignoreEmptyString: 是否忽略空字符串（仅 String 生效，默认 true）
+  ///
+  /// ### 示例
+  /// ```dart
+  ///  final userIds = users.select((u) => u.userId);
+  ///  ```
+  List<R> select<R>(R? Function(T item) selector, {
+    bool distinct = true,
+    bool ignoreNull = true,
+    bool ignoreEmptyString = true,
+  }) {
+    Iterable<R?> result = whereType<T>().map(selector);
+
+    if (ignoreNull) {
+      result = result.where((e) => e != null);
+    }
+
+    // 仅当 R 为 String 时，过滤空字符串
+    if (ignoreEmptyString) {
+      result = result.where((e) {
+        if (e is String) {
+          return e
+              .trim()
+              .isNotEmpty;
+        }
+        return true;
+      });
+    }
+
+    final list = result.cast<R>().toList();
+
+    return distinct ? list.toSet().toList() : list;
+  }
+
   /// 分块处理
   /// [chunkSize] 分块大小
   List<List<T>> chunk(int chunkSize) {
