@@ -21,14 +21,20 @@ abstract class SocketEventListener {
   /// 收到消息
   void onMessage(String event, Object? data);
 
-  /// 重连尝试
-  void onReconnectAttempt(int attempt, int maxAttempts);
+  /// 业务逻辑重连尝试
+  void onBizReconnectAttempt(int attempt, int maxAttempts);
 
-  /// 重连成功
-  void onReconnectSuccess();
+  /// 业务逻辑重连失败
+  void onBizReconnectFailed();
+
+  /// 重连
+  void onReconnect(Object? data);
 
   /// 重连失败
-  void onReconnectFailed();
+  void onReconnectFailed(Object? data);
+
+  /// 重连错误
+  void onReconnectError(Object? data);
 }
 
 /// 默认Socket事件监听器实现
@@ -69,17 +75,27 @@ class DefaultSocketEventListener implements SocketEventListener {
   }
 
   @override
-  void onReconnectAttempt(int attempt, int maxAttempts) {
+  void onBizReconnectAttempt(int attempt, int maxAttempts) {
     // 默认实现为空，子类可以重写
   }
 
   @override
-  void onReconnectSuccess() {
+  void onBizReconnectFailed() {
     // 默认实现为空，子类可以重写
   }
 
   @override
-  void onReconnectFailed() {
+  void onReconnect(Object? data) {
+    // 默认实现为空，子类可以重写
+  }
+
+  @override
+  void onReconnectFailed(Object? data) {
+    // 默认实现为空，子类可以重写
+  }
+
+  @override
+  void onReconnectError(Object? data) {
     // 默认实现为空，子类可以重写
   }
 }
@@ -154,24 +170,38 @@ class SocketEventListenerManager {
     }
   }
 
-  /// 通知重连尝试
-  void notifyReconnectAttempt(int attempt, int maxAttempts) {
+  /// 通知业务逻辑的重连尝试
+  void notifyBizReconnectAttempt(int attempt, int maxAttempts) {
     for (final listener in _listeners) {
-      listener.onReconnectAttempt(attempt, maxAttempts);
+      listener.onBizReconnectAttempt(attempt, maxAttempts);
     }
   }
 
-  /// 通知重连成功
-  void notifyReconnectSuccess() {
+  /// 通知业务逻辑的重连失败
+  void notifyBizReconnectFailed() {
     for (final listener in _listeners) {
-      listener.onReconnectSuccess();
+      listener.onBizReconnectFailed();
+    }
+  }
+
+  /// 通知重连
+  void notifyReconnect(Object? data) {
+    for (final listener in _listeners) {
+      listener.onReconnect(data);
     }
   }
 
   /// 通知重连失败
-  void notifyReconnectFailed() {
+  void notifyReconnectFailed(Object? data) {
     for (final listener in _listeners) {
-      listener.onReconnectFailed();
+      listener.onReconnectFailed(data);
+    }
+  }
+
+  /// 通知重连错误
+  void notifyReconnectError(Object? data) {
+    for (final listener in _listeners) {
+      listener.onReconnectError(data);
     }
   }
 }

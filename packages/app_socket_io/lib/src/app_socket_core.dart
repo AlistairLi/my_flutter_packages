@@ -79,6 +79,7 @@ class AppSocketCore {
 
       // 动态获取请求头
       var socketHeaders = await _config!.headers.call();
+      socketHeaders.removeWhere((key, value) => value == null);
 
       // 创建选项构建器
       var optionBuilder = client.OptionBuilder()
@@ -140,8 +141,10 @@ class AppSocketCore {
     if (shouldRetry) {
       _retryCount++;
 
-      _eventManager.notifyReconnectAttempt(
-          _retryCount, _config?.maxReconnectAttempts ?? 5);
+      _eventManager.notifyBizReconnectAttempt(
+        _retryCount,
+        _config?.maxReconnectAttempts ?? 5,
+      );
 
       if (_retryCount <= (_config?.maxReconnectAttempts ?? 5)) {
         _isReconnecting = true;
@@ -151,7 +154,7 @@ class AppSocketCore {
         _startReconnectTimer();
       } else {
         _isReconnecting = false;
-        _eventManager.notifyReconnectFailed();
+        _eventManager.notifyBizReconnectFailed();
       }
     } else {
       _coreSocket?.connect(); // 发起连接
@@ -259,6 +262,18 @@ class AppSocketCore {
     _coreSocket!.onConnectTimeout((data) {
       _connectStatus = SocketStatus.timeout;
       _eventManager.notifyConnectTimeout(data);
+    });
+
+    _coreSocket!.onReconnect((data) {
+      _eventManager.notifyReconnect(data);
+    });
+
+    _coreSocket!.onReconnectFailed((data) {
+      _eventManager.notifyReconnectFailed(data);
+    });
+
+    _coreSocket!.onReconnectError((data) {
+      _eventManager.notifyReconnectError(data);
     });
   }
 

@@ -212,27 +212,37 @@ class _SocketExamplePageState extends State<SocketExamplePage>
   }
 
   @override
+  void onConnectError(Object? data) {
+    _addMessage('❌ 连接错误');
+  }
+
+  @override
   void onMessage(String event, Object? data) {
     _addMessage('📨 收到消息 [$event]: $data');
   }
 
   @override
-  void onReconnectAttempt(int attempt, int maxAttempts) {
+  void onBizReconnectAttempt(int attempt, int maxAttempts) {
     _addMessage('🔄 重连尝试 $attempt/$maxAttempts');
   }
 
   @override
-  void onReconnectSuccess() {
-    _addMessage('✅ 重连成功');
-  }
-
-  @override
-  void onReconnectFailed() {
+  void onBizReconnectFailed() {
     _addMessage('❌ 重连失败');
   }
 
   @override
-  void onConnectError(Object? data) {
-    // TODO: implement onConnectError
+  void onReconnect(Object? data) {
+    _addMessage('✅ 重连');
+  }
+
+  @override
+  void onReconnectError(Object? data) {
+    _addMessage('✅ 重连错误');
+  }
+
+  @override
+  void onReconnectFailed(Object? data) {
+    _addMessage('✅ 重连失败');
   }
 }

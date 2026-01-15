@@ -79,16 +79,6 @@ class AppSocketEventListener extends DefaultSocketEventListener {
       print("Socket message is not Map<String, dynamic>");
     }
   }
-
-  @override
-  void onReconnectAttempt(int attempt, int maxAttempts) {
-    super.onReconnectAttempt(attempt, maxAttempts);
-  }
-
-  @override
-  void onReconnectFailed() {
-    super.onReconnectFailed();
-  }
 }
 
 /// 测试1事件处理器

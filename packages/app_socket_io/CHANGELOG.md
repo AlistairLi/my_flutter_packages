@@ -17,3 +17,7 @@
 ## 1.0.4
 
 - Modify query parameters.
+
+## 1.0.5
+
+- Add reconnection listener.
