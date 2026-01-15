@@ -47,7 +47,6 @@ class _SocketExamplePageState extends State<SocketExamplePage>
         headers: () async {
           return {'Authorization': 'Bearer your_token_here'};
         },
-        version: '1.0.0',
         socketPath: 'wss://your-socket-server.com',
       ),
     );

@@ -13,3 +13,7 @@
 ## 1.0.3
 
 - Modify the value of the "transports" parameter.
+
+## 1.0.4
+
+- Modify query parameters.

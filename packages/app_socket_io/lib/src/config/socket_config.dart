@@ -9,9 +9,9 @@ class SocketConfig {
   /// 获取请求头
   final Future<Map<String, dynamic>> Function() headers;
 
-  final String version;
   final String socketPath;
   final List<String>? transports;
+  final String? version;
 
   /// 重连间隔（毫秒）
   final int reconnectInterval;
@@ -29,9 +29,9 @@ class SocketConfig {
     required this.isLoggedIn,
     required this.token,
     required this.headers,
-    required this.version,
     required this.socketPath,
     this.transports,
+    this.version,
     this.reconnectInterval = 5000,
     this.maxReconnectAttempts = 5,
     this.enableAutoReconnect = true,
@@ -43,14 +43,12 @@ class SocketConfig {
     required Future<bool> Function() isLoggedIn,
     required Future<String?> Function() token,
     required Future<Map<String, dynamic>> Function() headers,
-    required String version,
     required String socketPath,
   }) {
     return SocketConfig(
       isLoggedIn: isLoggedIn,
       token: token,
       headers: headers,
-      version: version,
       socketPath: socketPath,
     );
   }
@@ -60,9 +58,9 @@ class SocketConfig {
     Future<bool> Function()? isLoggedIn,
     Future<String?> Function()? token,
     Future<Map<String, dynamic>> Function()? headers,
-    String? version,
     String? socketPath,
     List<String>? transports,
+    String? version,
     int? connectTimeout,
     int? reconnectInterval,
     int? maxReconnectAttempts,
@@ -73,9 +71,9 @@ class SocketConfig {
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
       token: token ?? this.token,
       headers: headers ?? this.headers,
-      version: version ?? this.version,
       socketPath: socketPath ?? this.socketPath,
       transports: transports ?? this.transports,
+      version: version ?? this.version,
       reconnectInterval: reconnectInterval ?? this.reconnectInterval,
       maxReconnectAttempts: maxReconnectAttempts ?? this.maxReconnectAttempts,
       enableAutoReconnect: enableAutoReconnect ?? this.enableAutoReconnect,

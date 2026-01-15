@@ -86,8 +86,7 @@ class AppSocketCore {
           .enableAutoConnect()
           .enableReconnection()
           .setTransports(_config!.transports ?? defaultTransports)
-          .setExtraHeaders(socketHeaders)
-          .setQuery({'token': token, 'ver': _config!.version});
+          .setExtraHeaders(socketHeaders);
 
       // 构建连接选项
       Map<String, dynamic> ops = optionBuilder.build();
@@ -98,8 +97,7 @@ class AppSocketCore {
 
       // 构建完整URL
       Map<String, String> params = <String, String>{};
-      params.addAll(socketUri.queryParameters);
-      params.addAll({'token': token, 'ver': _config!.version});
+      params.addAll({'token': token});
 
       Uri uri = socketUri.replace(queryParameters: params);
       var link = uri.toString();

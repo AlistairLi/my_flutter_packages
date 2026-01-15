@@ -24,7 +24,6 @@ class SocketUtilExample {
           "header2": "value",
         };
       },
-      version: "1.0.0",
       socketPath: "https://www.xxx.com",
     );
     GlobalSocketConfig.setGlobalConfig(config);
