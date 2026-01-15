@@ -1,7 +1,7 @@
 name: image_loader_tool
 description: A simple image loading tool.
-version: 1.0.0
-repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/image_loader_tool
+version: 1.0.1
+repository: https://github.com/image_loader_tool
 
 environment:
   sdk: '>=2.19.6 <4.0.0'

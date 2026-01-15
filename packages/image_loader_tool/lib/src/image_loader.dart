@@ -132,9 +132,25 @@ class ImageLoader {
   }) {
     // 使用传入参数或全局配置的默认值
     final actualPlaceholder = placeholder ?? _config.defaultPlaceholder;
-    final actualNetImageFit = fit ?? _config.defaultNetworkImageFit;
     final actualPlaceholderFit =
         placeholderFit ?? _config.defaultPlaceholderFit;
+
+    // 如果URL为空或null，直接返回占位图，避免网络请求错误
+    if (imageUrl == null || imageUrl.trim().isEmpty) {
+      final placeholderWidget =
+          _createPlaceholder(actualPlaceholder, actualPlaceholderFit);
+      return _applyBorderRadius(
+        placeholderWidget,
+        width: width,
+        height: height,
+        radius: radius,
+        borderRadius: borderRadius,
+        circular: circular,
+        border: border,
+      );
+    }
+
+    final actualNetImageFit = fit ?? _config.defaultNetworkImageFit;
     final actualFadeOutDuration = fadeOutDuration ?? _config.fadeOutDuration;
     final actualPlaceholderFadeInDuration =
         placeholderFadeInDuration ?? _config.placeholderFadeInDuration;
@@ -143,7 +159,7 @@ class ImageLoader {
         useOldImageOnUrlChange ?? _config.useOldImageOnUrlChange;
 
     final imageWidget = CachedNetworkImage(
-      imageUrl: imageUrl ?? "",
+      imageUrl: imageUrl,
       height: height,
       alignment: alignment,
       fit: actualNetImageFit,
@@ -279,7 +295,8 @@ class ImageLoader {
 
   ///预加载图片
   static void preloadNetworkImage(
-      String imageUrl, BuildContext context, ImageStreamListener? listener) {
+      String? imageUrl, BuildContext context, ImageStreamListener? listener) {
+    if (imageUrl == null || imageUrl.trim().isEmpty) return;
     final CachedNetworkImageProvider imageProvider =
         CachedNetworkImageProvider(imageUrl);
     final ImageStream imageStream =
