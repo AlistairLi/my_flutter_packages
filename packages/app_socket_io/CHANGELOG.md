@@ -9,3 +9,7 @@
 ## 1.0.2
 
 - New callback.
+
+## 1.0.3
+
+- Modify the value of the "transports" parameter.

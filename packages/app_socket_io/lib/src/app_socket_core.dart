@@ -9,12 +9,7 @@ import 'config/socket_config.dart';
 
 class AppSocketCore {
   /// 默认支持的传输方式
-  final defaultTransports = <String>[
-    'websocket',
-    'xhr-multipart',
-    'xhr-polling',
-    'jsonp-polling',
-  ];
+  final defaultTransports = <String>['websocket'];
 
   client.Socket? _coreSocket;
 
@@ -83,13 +78,15 @@ class AppSocketCore {
       }
 
       // 动态获取请求头
-      var asSocketHeader = await _config!.headers.call();
+      var socketHeaders = await _config!.headers.call();
 
       // 创建选项构建器
       var optionBuilder = client.OptionBuilder()
           .enableForceNew()
+          .enableAutoConnect()
+          .enableReconnection()
           .setTransports(_config!.transports ?? defaultTransports)
-          .setExtraHeaders(asSocketHeader)
+          .setExtraHeaders(socketHeaders)
           .setQuery({'token': token, 'ver': _config!.version});
 
       // 构建连接选项
@@ -124,9 +121,6 @@ class AppSocketCore {
     _retryCount = 0;
 
     _coreSocket?.dispose();
-    if (kDebugMode) {
-      print("[AppSocketCore] Socket disconnected");
-    }
     _coreSocket = null;
     _connectStatus = SocketStatus.unconnected;
   }
@@ -198,22 +192,15 @@ class AppSocketCore {
           'data': data,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
         });
-        if (kDebugMode) {
-          print("[AppSocketCore] Message queued: $event (not connected)");
-        }
         return false;
       }
 
-      _coreSocket?.emitWithAck(event, data, ack: () {
-        if (kDebugMode) {
-          print("[AppSocketCore] Socket event sent successfully: $event");
-        }
-      });
+      _coreSocket?.emitWithAck(event, data, ack: () {});
 
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print("[AppSocketCore] Socket send event error: $e");
+        print("[app_socket_io], sendEvent() error: $e");
       }
       return false;
     }
@@ -244,10 +231,6 @@ class AppSocketCore {
       _isReconnecting = false;
       _retryCount = 0;
       _stopReconnectTimer();
-
-      if (kDebugMode) {
-        print('[AppSocketCore] Socket connected');
-      }
       _eventManager.notifyConnected(data);
 
       // 发送队列中的消息
@@ -256,17 +239,11 @@ class AppSocketCore {
 
     _coreSocket!.onConnecting((data) {
       _connectStatus = SocketStatus.connecting;
-      if (kDebugMode) {
-        print('[AppSocketCore] Socket connecting');
-      }
       _eventManager.notifyConnecting(data);
     });
 
     _coreSocket!.onDisconnect((data) async {
       _connectStatus = SocketStatus.disconnect;
-      if (kDebugMode) {
-        print('[AppSocketCore] Socket disconnected');
-      }
       _eventManager.notifyDisconnected(data);
 
       // 自动重连
@@ -277,18 +254,12 @@ class AppSocketCore {
 
     _coreSocket!.onConnectError((data) {
       _connectStatus = SocketStatus.error;
-      if (kDebugMode) {
-        print('[AppSocketCore] Socket connect error: $data');
-      }
       _eventManager.notifyConnectError(data);
       _coreSocket?.disconnect();
     });
 
     _coreSocket!.onConnectTimeout((data) {
       _connectStatus = SocketStatus.timeout;
-      if (kDebugMode) {
-        print('[AppSocketCore] Socket connect timeout');
-      }
       _eventManager.notifyConnectTimeout(data);
     });
   }
@@ -310,12 +281,6 @@ class AppSocketCore {
 
   /// 处理收到的数据
   void _handleSocketData(String event, Object? data) {
-    if (_config?.enableLogging ?? true) {
-      if (kDebugMode) {
-        print('[AppSocketCore] Socket received: $event - $data');
-      }
-    }
-
     _eventManager.notifyMessage(event, data);
   }
 
