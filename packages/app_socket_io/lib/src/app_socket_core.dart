@@ -164,12 +164,21 @@ class AppSocketCore {
   /// 开始重连定时器
   void _startReconnectTimer() {
     _stopReconnectTimer();
-    _reconnectTimer =
-        Timer(Duration(milliseconds: _config?.reconnectInterval ?? 5000), () {
+    final intervalMs = _getReconnectIntervalMs();
+    _reconnectTimer = Timer(Duration(milliseconds: intervalMs), () {
       if (_isReconnecting && !_connected()) {
         checkConnectStatus(shouldRetry: true);
       }
     });
+  }
+
+  int _getReconnectIntervalMs() {
+    // 指数退避：2000/4000/8000/16000/32000（上限 32000）
+    const base = 2000;
+    const max = 32000;
+    final retryIndex = _retryCount <= 0 ? 0 : _retryCount - 1;
+    final interval = base * (1 << retryIndex);
+    return interval > max ? max : interval;
   }
 
   /// 停止重连定时器

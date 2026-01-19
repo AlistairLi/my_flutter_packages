@@ -21,3 +21,7 @@
 ## 1.0.5
 
 - Add reconnection listener.
+
+## 1.0.6
+
+- Modification of reconnection interval time.
