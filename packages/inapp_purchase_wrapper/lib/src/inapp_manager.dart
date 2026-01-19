@@ -47,17 +47,22 @@ class InAppManager {
   /// 日志回调
   final IIAPLogger? _logger;
 
+  /// 网络状态提供者
+  final IIAPNetworkStatusProvider? _networkStatusProvider;
+
   InAppManager({
     required PaymentListener paymentListener,
     required IInAppVerifier inAppVerifier,
     required IInAppStorage inAppStorage,
     IIAPLogger? logger,
+    IIAPNetworkStatusProvider? networkStatusProvider,
   })  : _inAppPlatform =
             Platform.isAndroid ? InAppAndroidPlatform() : InAppIOSPlatform(),
         _paymentListener = paymentListener,
         _inAppStorage = InAppStorageWrapper(inAppStorage, logger),
         _inAppVerifier = inAppVerifier,
-        _logger = logger;
+        _logger = logger,
+        _networkStatusProvider = networkStatusProvider;
 
   /// 初始化监听内购
   void init() {
@@ -148,7 +153,8 @@ class InAppManager {
           productId: productIds.toString(),
           orderNo: orderNo,
           errorCode: '-1',
-          errorMsg: "error: InAppPurchase.isAvailable: $available",
+          errorMsg:
+              "error: InAppPurchase.isAvailable: $available, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}",
           uuid: uuid,
           elapsedTime: startTime != null
               ? DateTime.now().millisecondsSinceEpoch - startTime
@@ -167,7 +173,8 @@ class InAppManager {
         productId: productIds.toString(),
         orderNo: orderNo,
         errorCode: '-1',
-        errorMsg: 'error: ${response.error?.toString()}',
+        errorMsg:
+            'error: ${response.error?.toString()}, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}',
         uuid: uuid,
         elapsedTime: startTime != null
             ? DateTime.now().millisecondsSinceEpoch - startTime
@@ -182,7 +189,8 @@ class InAppManager {
         productId: productIds.toString(),
         orderNo: orderNo,
         errorCode: '-1',
-        errorMsg: "error: ProductDetailsResponse.productDetails is empty",
+        errorMsg:
+            "error: ProductDetailsResponse.productDetails is empty, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}",
         uuid: uuid,
         elapsedTime: startTime != null
             ? DateTime.now().millisecondsSinceEpoch - startTime
@@ -257,7 +265,8 @@ class InAppManager {
         event: "launch_pay",
         productId: productId,
         orderNo: orderNo,
-        errorMsg: "error: InAppPurchase.isAvailable: $available",
+        errorMsg:
+            "error: InAppPurchase.isAvailable: $available, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}",
       );
       return false;
     }
@@ -291,7 +300,8 @@ class InAppManager {
         event: "launch_pay",
         productId: productId,
         orderNo: orderNo,
-        errorMsg: "error: productDetails is null",
+        errorMsg:
+            "error: productDetails is null, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}",
       );
       return false;
     }
@@ -326,7 +336,7 @@ class InAppManager {
         orderNo: orderNo,
         errorCode: result ? "0" : "-1",
         errorMsg:
-            "${result ? "success" : "failed"}, autoConsume: $_kAutoConsume, product details: ${_inAppPlatform.getProductDetailsInfo(productDetails)}",
+            "${result ? "success" : "failed"}, autoConsume: $_kAutoConsume, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}, product details: ${_inAppPlatform.getProductDetailsInfo(productDetails)}",
       );
       return result;
     } catch (e) {
@@ -365,7 +375,7 @@ class InAppManager {
       orderNo: orderModel?.orderNo,
       errorCode: purchaseDetails.status.name,
       errorMsg:
-          "purchaseID: ${purchaseDetails.purchaseID}${iapError != null ? ", ${iapError.toString()}" : ""}${orderModel != null ? ", ${orderModel.toString()}" : ""}",
+          "purchaseID: ${purchaseDetails.purchaseID}, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}${iapError != null ? ", ${iapError.toString()}" : ""}${orderModel != null ? ", ${orderModel.toString()}" : ""}",
     );
 
     if (purchaseDetails.status == PurchaseStatus.pending) {

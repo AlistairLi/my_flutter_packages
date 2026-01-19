@@ -49,3 +49,7 @@
 ## 1.1.2
 
 - Fixed bug.
+
+## 1.1.3
+
+- Reporting network status through tagging.

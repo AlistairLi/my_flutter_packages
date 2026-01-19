@@ -6,6 +6,7 @@ import 'in_app_android_verifier_example.dart';
 import 'in_app_ios_verifier_example.dart';
 import 'in_app_listener_example.dart';
 import 'in_app_logger_example.dart';
+import 'in_app_network_status_provider_example.dart';
 import 'in_app_storage_example.dart';
 
 void main() {
@@ -16,6 +17,7 @@ void main() {
         : InAppIosVerifierExample(),
     inAppStorage: InAppStorageImplExample(),
     logger: IAPLoggerExample(),
+    networkStatusProvider: IAPNetworkStatusProviderExample(),
   );
 
   // App启动时启动监听
