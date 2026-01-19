@@ -1,6 +1,6 @@
 name: aj_wrapper
 description: A wrapper for the adjust_sdk to simplify integration and usage in Flutter applications.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/aj_wrapper
 
 environment:

@@ -26,6 +26,12 @@ class AJWrapperService {
 
   String get adjustSdkVersion => _adjustSdkVersion ?? "";
 
+  static const String _defaultGoogleId = "00000000-0000-0000-0000-00000000000";
+
+  String? _googleId;
+
+  String get finalGoogleId => _googleId ?? _defaultGoogleId;
+
   AJWrapperService({
     required AJStorageInterface storage,
     required AJConfigInterface config,
@@ -33,6 +39,11 @@ class AJWrapperService {
   })  : _storage = storage,
         _config = config,
         _error = error;
+
+  /// 获取 Google Id
+  void setupGoogleId() async {
+    _googleId = await Adjust.getGoogleAdId();
+  }
 
   /// 初始化 Adjust, 一次生命周期只初始化一次
   void initialize() async {

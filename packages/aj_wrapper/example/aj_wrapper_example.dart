@@ -74,6 +74,9 @@ void main() {
     error: MyAJError(),
   );
 
+  // 获取 Google ID
+  ajService.setupGoogleId();
+
   // Initialization, be mindful of the dependency of configuration parameters
   ajService.initialize();
 
