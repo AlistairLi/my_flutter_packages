@@ -15,3 +15,4 @@ export 'src/platform/inapp_android_platform.dart';
 export 'src/platform/inapp_ios_platform.dart';
 export 'src/storage/i_inapp_storage.dart';
 export 'src/verifier/i_inapp_verifier.dart';
+export 'src/utils/iap_toast_helper.dart';

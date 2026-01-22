@@ -245,6 +245,7 @@ class InAppManager {
         productId: productId,
         orderNo: orderNo,
         errorMsg: "error: productId is empty",
+        details: IAPToastMessages.productIdMissing,
       );
       return false;
     }
@@ -254,6 +255,7 @@ class InAppManager {
         productId: productId,
         orderNo: orderNo,
         errorMsg: "error: orderNo is empty",
+        details: IAPToastMessages.orderNoMissing,
       );
       return false;
     }
@@ -267,6 +269,7 @@ class InAppManager {
         orderNo: orderNo,
         errorMsg:
             "error: InAppPurchase.isAvailable: $available, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}",
+        details: IAPToastMessages.notAvailable,
       );
       return false;
     }
@@ -276,7 +279,7 @@ class InAppManager {
 
     // 如果商品信息为空，则从商店获取
     if (productDetails == null) {
-      int retryCount = 3; // 设置最大重试次数
+      int retryCount = 1; // 设置最大重试次数
       while (retryCount >= 0) {
         var productDetailList = await _loadProductDetails(
           productIds: [productId],
@@ -286,12 +289,11 @@ class InAppManager {
         _putProductDetails(productDetailList);
         productDetails = _getProductDetails(productId);
         if (productDetails != null) break; // 成功获取则跳出循环
-        retryCount--;
-        var delayMillis = getRetryDelayMillis(retryCount);
-        // 延迟 delayMillis 毫秒秒后重试
-        if (delayMillis > 0) {
-          await Future.delayed(Duration(milliseconds: delayMillis));
+        // 只有在还有重试机会时才延迟
+        if (retryCount > 0) {
+          await Future.delayed(Duration(milliseconds: 300));
         }
+        retryCount--;
       }
     }
 
@@ -302,6 +304,7 @@ class InAppManager {
         orderNo: orderNo,
         errorMsg:
             "error: productDetails is null, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}",
+        details: IAPToastMessages.productDetailsNull,
       );
       return false;
     }
@@ -345,6 +348,7 @@ class InAppManager {
         productId: productId,
         orderNo: orderNo,
         errorMsg: "error: ${e.toString()}",
+        details: IAPToastMessages.launchPayFailed,
       );
     }
     return false;
@@ -380,10 +384,14 @@ class InAppManager {
 
     if (purchaseDetails.status == PurchaseStatus.pending) {
       // 等待中
-      _paymentListener.onPending(purchaseDetails);
+      _paymentListener.onPending(
+        purchaseDetails,
+        IAPToastMessages.paymentPending,
+      );
     } else {
       if (purchaseDetails.status == PurchaseStatus.error) {
         // 错误
+        var message = IAPToastHelper.resolveErrorToast(iapError);
         _paymentListener.onError(
           IAPError(
             source: 'launch_pay_resp',
@@ -391,10 +399,15 @@ class InAppManager {
             message: iapError?.message ?? '',
             details: purchaseDetails,
           ),
+          message,
         );
       } else if (purchaseDetails.status == PurchaseStatus.canceled) {
         // 取消
-        _paymentListener.onCanceled(purchaseDetails);
+        var message = IAPToastHelper.resolveCancelToast(iapError);
+        _paymentListener.onCanceled(
+          purchaseDetails,
+          message,
+        );
       } else if (purchaseDetails.status == PurchaseStatus.purchased ||
           purchaseDetails.status == PurchaseStatus.restored) {
         var result = await _verifyPurchase(purchaseDetails, orderModel);
@@ -463,7 +476,9 @@ class InAppManager {
       errorCode: result.errorCode,
       errorMsg:
           "purchaseStatus: ${purchaseDetails.status.name}, purchaseID: ${purchaseDetails.purchaseID}, error: ${result.errorMsg}",
-      details: purchaseDetails,
+      details: purchaseDetails.status == PurchaseStatus.purchased
+          ? result.errorMsg?.trim()
+          : "",
     );
   }
 
@@ -534,6 +549,7 @@ class InAppManager {
       errorCode: errorCode ?? '-1',
       errorMsg: errorMsg,
     );
+    var message = details is String ? details.trim() : null;
     _paymentListener.onError(
       IAPError(
         source: event,
@@ -541,6 +557,7 @@ class InAppManager {
         message: errorMsg ?? '',
         details: details,
       ),
+      message,
     );
   }
 
@@ -563,25 +580,5 @@ class InAppManager {
       uuid: uuid,
       elapsedTime: elapsedTime,
     );
-  }
-
-  /// 获取重试的延迟毫秒数
-  int getRetryDelayMillis(int retryCount) {
-    int delayMilliseconds;
-    switch (retryCount) {
-      case 2: // 第一次重试
-        delayMilliseconds = 500;
-        break;
-      case 1: // 第二次重试
-        delayMilliseconds = 1000;
-        break;
-      case 0: // 第三次重试
-        delayMilliseconds = 2000;
-        break;
-      default:
-        delayMilliseconds = 0;
-        break;
-    }
-    return delayMilliseconds;
   }
 }

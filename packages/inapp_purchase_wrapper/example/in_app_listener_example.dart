@@ -2,9 +2,14 @@ import 'package:inapp_purchase_wrapper/inapp_purchase_wrapper.dart';
 
 class InAppPurchaseListenerExample extends PaymentListener {
   @override
-  void onPending(PurchaseDetails purchaseDetails) {
+  void onPending(PurchaseDetails purchaseDetails, String? message) {
     // Loading.dismiss();
-    // toast("The purchase is pending, Please wait for the confirmation to be completed.");
+    if (message != null && message.isNotEmpty) {
+      // 调用方可对message添加多语言支持
+      // toast(message);
+    } else {
+      // toast("The purchase is pending, Please wait for the confirmation to be completed.");
+    }
   }
 
   @override
@@ -14,13 +19,21 @@ class InAppPurchaseListenerExample extends PaymentListener {
   }
 
   @override
-  void onCanceled(PurchaseDetails purchaseDetails) {
+  void onCanceled(PurchaseDetails purchaseDetails, String? message) {
     // Loading.dismiss();
+    if (message != null && message.isNotEmpty) {
+      // 调用方可对message添加多语言支持
+      // toast(message);
+    }
   }
 
   @override
-  void onError(IAPError error) {
+  void onError(IAPError error, String? message) {
     // Loading.dismiss();
+    if (message != null && message.isNotEmpty) {
+      // 调用方可对message添加多语言支持
+      // toast(message);
+    }
   }
 
   @override

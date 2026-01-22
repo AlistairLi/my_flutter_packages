@@ -53,3 +53,7 @@
 ## 1.1.3
 
 - Reporting network status through tagging.
+
+## 1.1.4
+
+- Add toast message.
