@@ -69,3 +69,7 @@
 ## 1.1.7
 
 - Fix the issues of MultiTabView2.
+
+## 1.1.8
+
+- Add background components.

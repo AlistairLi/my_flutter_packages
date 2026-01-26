@@ -4,6 +4,7 @@ export 'src/animation/scale_animation_widget.dart';
 export 'src/app_gesture_detector.dart';
 export 'src/app_keyboard_listener.dart';
 export 'src/button/app_button.dart';
+export 'src/container/app_background.dart';
 export 'src/container/app_container.dart';
 export 'src/container/app_sized_box.dart';
 export 'src/custom_app_bar.dart';
