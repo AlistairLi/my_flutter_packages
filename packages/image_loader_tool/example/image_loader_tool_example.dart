@@ -73,8 +73,6 @@ class ImageUtilToolExample extends StatelessWidget {
                     isRe: true,
                     resEncryptionOutDir:
                         '/data/data/com.example.app/files/assets',
-                    defaultPlaceholderFit: BoxFit.contain,
-                    defaultNetworkImageFit: BoxFit.cover,
                   ),
                 );
               },

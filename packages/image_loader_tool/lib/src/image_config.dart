@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+
 
 /// 图片加载配置类
 class ImageLoaderConfig {
@@ -10,12 +10,6 @@ class ImageLoaderConfig {
 
   /// 资源加密后的输出目录
   final String? resEncryptionOutDir;
-
-  /// 默认占位图适配方式
-  final BoxFit defaultPlaceholderFit;
-
-  /// 默认网络图片适配方式
-  final BoxFit defaultNetworkImageFit;
 
   /// 默认动画时长
   final Duration fadeOutDuration;
@@ -29,8 +23,6 @@ class ImageLoaderConfig {
     this.defaultPlaceholder,
     this.isRe = false,
     this.resEncryptionOutDir,
-    this.defaultPlaceholderFit = BoxFit.cover,
-    this.defaultNetworkImageFit = BoxFit.cover,
     this.fadeOutDuration = const Duration(milliseconds: 200),
     this.placeholderFadeInDuration = const Duration(milliseconds: 200),
     this.fadeInDuration = const Duration(milliseconds: 200),
@@ -47,8 +39,6 @@ class ImageLoaderConfig {
     String? defaultPlaceholder,
     bool isRe = false,
     String? resEncryptionOutDir,
-    BoxFit defaultPlaceholderFit = BoxFit.cover,
-    BoxFit defaultNetworkImageFit = BoxFit.cover,
     Duration? fadeOutDuration,
     Duration? placeholderFadeInDuration,
     Duration? fadeInDuration,
@@ -58,8 +48,6 @@ class ImageLoaderConfig {
       defaultPlaceholder: defaultPlaceholder,
       isRe: isRe,
       resEncryptionOutDir: resEncryptionOutDir,
-      defaultPlaceholderFit: defaultPlaceholderFit,
-      defaultNetworkImageFit: defaultNetworkImageFit,
       fadeOutDuration: fadeOutDuration ?? const Duration(milliseconds: 10),
       placeholderFadeInDuration:
           placeholderFadeInDuration ?? const Duration(milliseconds: 10),

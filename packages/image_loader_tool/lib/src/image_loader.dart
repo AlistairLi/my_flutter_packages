@@ -36,7 +36,12 @@ class ImageLoader {
   // }
 
   /// 创建占位图组件
-  static Widget _createPlaceholder(String? placeholder, BoxFit fit) {
+  static Widget _createPlaceholder(
+    String? placeholder,
+    double? width,
+    double? height,
+    BoxFit? fit,
+  ) {
     if (placeholder == null || placeholder.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -44,11 +49,15 @@ class ImageLoader {
     if (shouldUseRe) {
       return Image.memory(
         imgCache[placeholder] ?? kTransparentImage,
+        width: width,
+        height: height,
         fit: fit,
       );
     }
     return Image.asset(
       placeholder,
+      width: width,
+      height: height,
       fit: fit,
     );
   }
@@ -102,8 +111,8 @@ class ImageLoader {
   ///[height] 图片视图高
   ///[placeholder] 加载占位图，如果为空则使用全局配置的默认占位图
   ///[alignment] 对齐方式，默认 Alignment.center
-  ///[fit] 网络图片的裁剪方式，默认使用全局配置
-  ///[placeholderFit] 占位图片的裁剪方式，默认使用全局配置
+  ///[fit] 网络图片的裁剪方式
+  ///[placeholderFit] 占位图片的裁剪方式
   ///[fadeOutDuration] 淡出动画时长
   ///[placeholderFadeInDuration] 占位图淡入动画时长
   ///[fadeInDuration] 图片淡入动画时长
@@ -118,8 +127,8 @@ class ImageLoader {
     String? placeholder,
     ImageErrorWidgetBuilder? errorBuilder,
     Alignment alignment = Alignment.center,
-    BoxFit? fit,
-    BoxFit? placeholderFit,
+    BoxFit? fit = BoxFit.cover,
+    BoxFit? placeholderFit = BoxFit.cover,
     Duration? fadeOutDuration,
     Duration? placeholderFadeInDuration,
     Duration? fadeInDuration,
@@ -132,13 +141,15 @@ class ImageLoader {
   }) {
     // 使用传入参数或全局配置的默认值
     final actualPlaceholder = placeholder ?? _config.defaultPlaceholder;
-    final actualPlaceholderFit =
-        placeholderFit ?? _config.defaultPlaceholderFit;
 
     // 如果URL为空或null，直接返回占位图，避免网络请求错误
     if (imageUrl == null || imageUrl.trim().isEmpty) {
-      final placeholderWidget =
-          _createPlaceholder(actualPlaceholder, actualPlaceholderFit);
+      final placeholderWidget = _createPlaceholder(
+        actualPlaceholder,
+        width,
+        height,
+        placeholderFit,
+      );
       return _applyBorderRadius(
         placeholderWidget,
         width: width,
@@ -150,7 +161,6 @@ class ImageLoader {
       );
     }
 
-    final actualNetImageFit = fit ?? _config.defaultNetworkImageFit;
     final actualFadeOutDuration = fadeOutDuration ?? _config.fadeOutDuration;
     final actualPlaceholderFadeInDuration =
         placeholderFadeInDuration ?? _config.placeholderFadeInDuration;
@@ -162,19 +172,28 @@ class ImageLoader {
       imageUrl: imageUrl,
       height: height,
       alignment: alignment,
-      fit: actualNetImageFit,
+      fit: fit,
       width: width,
       fadeOutDuration: actualFadeOutDuration,
       placeholderFadeInDuration: actualPlaceholderFadeInDuration,
       fadeInDuration: actualFadeInDuration,
       useOldImageOnUrlChange: actualUseOldImageOnUrlChange,
       matchTextDirection: matchTextDirection,
-      placeholder: (context, url) =>
-          _createPlaceholder(actualPlaceholder, actualPlaceholderFit),
+      placeholder: (context, url) => _createPlaceholder(
+        actualPlaceholder,
+        width,
+        height,
+        placeholderFit,
+      ),
       errorWidget: (context, url, error) {
         return errorBuilder?.call(
                 context, url, StackTrace.fromString(error.toString())) ??
-            _createPlaceholder(actualPlaceholder, actualPlaceholderFit);
+            _createPlaceholder(
+              actualPlaceholder,
+              width,
+              height,
+              placeholderFit,
+            );
       },
     );
 
@@ -207,7 +226,7 @@ class ImageLoader {
     double? width,
     double? height,
     Animation<double>? opacity,
-    BoxFit? fit,
+    BoxFit? fit = BoxFit.cover,
     BlendMode? colorBlendMode,
     ImageRepeat repeat = ImageRepeat.noRepeat,
     AlignmentGeometry alignment = Alignment.center,
@@ -330,7 +349,7 @@ class ImageLoader {
     double? width,
     double? height,
     String? placeholder,
-    BoxFit? fit = BoxFit.cover,
+    BoxFit? fit,
     Alignment alignment = Alignment.center,
     bool circular = false,
     double? radius,
@@ -396,7 +415,7 @@ class ImageLoader {
     Color? color,
     double? scale,
     Animation<double>? opacity,
-    BoxFit? fit,
+    BoxFit? fit = BoxFit.cover,
     BlendMode? colorBlendMode,
     ImageRepeat repeat = ImageRepeat.noRepeat,
     AlignmentGeometry alignment = Alignment.center,
@@ -471,7 +490,7 @@ class ImageLoader {
     Color? color,
     double? scale,
     Animation<double>? opacity,
-    BoxFit? fit,
+    BoxFit? fit = BoxFit.cover,
     BlendMode? colorBlendMode,
     ImageRepeat repeat = ImageRepeat.noRepeat,
     AlignmentGeometry alignment = Alignment.center,

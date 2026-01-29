@@ -1,6 +1,6 @@
 name: image_loader_tool
 description: A simple image loading tool.
-version: 1.0.1
+version: 1.0.2
 repository: https://github.com/image_loader_tool
 
 environment:
