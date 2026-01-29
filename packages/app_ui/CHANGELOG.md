@@ -73,3 +73,7 @@
 ## 1.1.8
 
 - Add background components.
+
+## 1.1.9
+
+- Modify the AppBackground component.

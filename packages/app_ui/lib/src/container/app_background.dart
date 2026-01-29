@@ -26,6 +26,21 @@ class AppBackground extends StatelessWidget {
   /// 背景位置，可选参数，默认为背景
   final DecorationPosition position;
 
+  /// 背景的圆角，可选参数，默认为无圆角
+  final BorderRadiusGeometry? borderRadius;
+
+  /// 纹理图片的缩放倍率，值越大纹理越细
+  final double imageScale;
+
+  /// 纹理图片的缩放方式
+  final BoxFit imageFit;
+
+  /// 纹理图片的采样质量
+  final FilterQuality filterQuality;
+
+  /// 纹理图片的不透明度（0~1），值越小纹理越细腻
+  final double imageOpacity;
+
   const AppBackground({
     super.key,
     required this.assetName,
@@ -35,12 +50,18 @@ class AppBackground extends StatelessWidget {
     this.colors = const [Color(0xFFF5F5F5), Color(0xFFF5F5F5)],
     this.stops,
     this.position = DecorationPosition.background,
+    this.borderRadius,
+    this.imageScale = 1.0,
+    this.imageFit = BoxFit.none,
+    this.filterQuality = FilterQuality.none,
+    this.imageOpacity = 1.0,
   });
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
+        borderRadius: borderRadius,
         gradient: LinearGradient(
           begin: begin,
           end: end,
@@ -49,8 +70,34 @@ class AppBackground extends StatelessWidget {
         ),
         image: DecorationImage(
           image: AssetImage(assetName),
-          fit: BoxFit.contain,
+          fit: imageFit,
           repeat: ImageRepeat.repeat,
+          scale: imageScale,
+          filterQuality: filterQuality,
+          colorFilter: imageOpacity >= 1.0
+              ? null
+              : ColorFilter.matrix([
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  imageOpacity,
+                  0,
+                ]),
         ),
       ),
       position: position,
