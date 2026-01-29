@@ -77,3 +77,7 @@
 ## 1.1.9
 
 - Modify the AppBackground component.
+
+## 1.2.0
+
+- Modify the AppBackground component.

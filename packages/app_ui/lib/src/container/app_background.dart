@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 /// 通常用于应用的整体背景或页面背景区域
 class AppBackground extends StatelessWidget {
   /// 背景图像资源路径
-  final String assetName;
+  final String? assetName;
+
+  /// 背景图片资源
+  final ImageProvider? imageProvider;
 
   /// 渐变起始位置，默认为顶部中心
   final AlignmentGeometry begin;
@@ -29,6 +32,9 @@ class AppBackground extends StatelessWidget {
   /// 背景的圆角，可选参数，默认为无圆角
   final BorderRadiusGeometry? borderRadius;
 
+  /// 纹理图片的重复方式
+  final ImageRepeat repeat;
+
   /// 纹理图片的缩放倍率，值越大纹理越细
   final double imageScale;
 
@@ -43,19 +49,24 @@ class AppBackground extends StatelessWidget {
 
   const AppBackground({
     super.key,
-    required this.assetName,
     required this.child,
+    this.assetName,
+    this.imageProvider,
     this.begin = Alignment.topCenter,
     this.end = Alignment.bottomCenter,
     this.colors = const [Color(0xFFF5F5F5), Color(0xFFF5F5F5)],
     this.stops,
     this.position = DecorationPosition.background,
+    this.repeat = ImageRepeat.repeat,
     this.borderRadius,
     this.imageScale = 1.0,
     this.imageFit = BoxFit.none,
     this.filterQuality = FilterQuality.none,
     this.imageOpacity = 1.0,
-  });
+  }) : assert(
+          assetName != null || imageProvider != null,
+          'assetName and imageProvider cannot both be null',
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +80,9 @@ class AppBackground extends StatelessWidget {
           stops: stops,
         ),
         image: DecorationImage(
-          image: AssetImage(assetName),
+          image: imageProvider ?? AssetImage(assetName!),
           fit: imageFit,
-          repeat: ImageRepeat.repeat,
+          repeat: repeat,
           scale: imageScale,
           filterQuality: filterQuality,
           colorFilter: imageOpacity >= 1.0
