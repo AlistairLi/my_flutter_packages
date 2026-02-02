@@ -81,3 +81,7 @@
 ## 1.2.0
 
 - Modify the AppBackground component.
+
+## 1.2.1
+
+- Export.
