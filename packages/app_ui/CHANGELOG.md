@@ -85,3 +85,7 @@
 ## 1.2.1
 
 - Export.
+
+## 1.2.2
+
+- AppBackground add parameters.

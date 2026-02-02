@@ -32,6 +32,9 @@ class AppBackground extends StatelessWidget {
   /// 背景的圆角，可选参数，默认为无圆角
   final BorderRadiusGeometry? borderRadius;
 
+  /// 背景的阴影，可选参数，默认为无阴影
+  final List<BoxShadow>? boxShadow;
+
   /// 纹理图片的重复方式
   final ImageRepeat repeat;
 
@@ -59,6 +62,7 @@ class AppBackground extends StatelessWidget {
     this.position = DecorationPosition.background,
     this.repeat = ImageRepeat.repeat,
     this.borderRadius,
+    this.boxShadow,
     this.imageScale = 1.0,
     this.imageFit = BoxFit.none,
     this.filterQuality = FilterQuality.none,
@@ -79,6 +83,7 @@ class AppBackground extends StatelessWidget {
           colors: colors,
           stops: stops,
         ),
+        boxShadow: boxShadow,
         image: DecorationImage(
           image: imageProvider ?? AssetImage(assetName!),
           fit: imageFit,
