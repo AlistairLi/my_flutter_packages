@@ -9,7 +9,10 @@ import 'package:flutter/material.dart';
 ///   则文本会自动居中显示。
 /// - 当 [child] 是 [Text]、[AppText] 或 [RichText]，会自动包裹 [Padding]，若未指定 [textPadding]，
 ///   则根据容器宽度或 [widthScaleFactor] 自动计算左右边距。
-///   TODO 添加对设置背景图片的支持
+/// - 可通过 [useFittedBox] 控制是否为上述文本子组件使用 FittedBox，默认不使用。
+/// - 支持 [decorationImage] 设置背景图。
+/// - 支持 [topRadius]/[bottomRadius] 分别设置顶部、底部左右圆角。
+/// - 当同时使用 [decorationImage] 与圆角且 [clipBehavior] 为 [Clip.none] 时，会改为 [Clip.antiAlias] 以正确裁剪背景图。
 class AppContainer extends StatelessWidget {
   final Widget? child;
   final double? width;
@@ -69,12 +72,21 @@ class AppContainer extends StatelessWidget {
   final EdgeInsetsGeometry? textPadding;
 
   /// 圆角设置
-  /// 优先级：borderRadius > radius > 无圆角
+  /// 优先级：borderRadius > topRadius/bottomRadius > radius > 无圆角
   final BorderRadiusGeometry? borderRadius;
   final double? radius;
 
+  /// 顶部左右圆角（同时设置 topLeft、topRight）
+  final double? topRadius;
+
+  /// 底部左右圆角（同时设置 bottomLeft、bottomRight）
+  final double? bottomRadius;
+
   /// 是否设置为圆形
   final bool circular;
+
+  /// BoxDecoration 背景图
+  final DecorationImage? decorationImage;
 
   /// 子组件的裁剪行为
   /// - Clip.none: 不裁剪
@@ -103,6 +115,9 @@ class AppContainer extends StatelessWidget {
   /// 是否自动居中文本类型的子组件
   /// 当 child 是 Text、AppText 或 RichText 时，如果未设置 alignment，是否自动居中
   final bool autoCenterText;
+
+  /// 当 child 为 Text/AppText/RichText 时是否使用 FittedBox 包裹（默认不使用）
+  final bool useFittedBox;
 
   const AppContainer({
     super.key,
@@ -139,7 +154,10 @@ class AppContainer extends StatelessWidget {
     this.gradient,
     this.borderRadius,
     this.radius,
+    this.topRadius,
+    this.bottomRadius,
     this.circular = false,
+    this.decorationImage,
     this.clipBehavior = Clip.none,
     this.childBorderRadius,
     this.childRadius,
@@ -152,13 +170,20 @@ class AppContainer extends StatelessWidget {
     this.debounceTap = true,
     this.widthScaleFactor = 1.0,
     this.autoCenterText = true,
+    this.useFittedBox = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 处理 size 属性
     final actualWidth = size ?? width;
     final actualHeight = size ?? height;
+    final borderRadiusValue = circular ? null : _buildBorderRadius();
+    // 有背景图且带圆角时需裁剪，否则背景图会画出圆角外
+    final effectiveClipBehavior = (decorationImage != null &&
+            borderRadiusValue != null &&
+            clipBehavior == Clip.none)
+        ? Clip.antiAlias
+        : clipBehavior;
 
     Widget current = Container(
       width: actualWidth,
@@ -167,12 +192,13 @@ class AppContainer extends StatelessWidget {
       padding: _applyPadding(),
       margin: _applyMargin(),
       alignment: _buildAlignment(),
-      clipBehavior: clipBehavior,
+      clipBehavior: effectiveClipBehavior,
       decoration: BoxDecoration(
         color: gradient == null ? color : null,
         gradient: gradient,
+        image: decorationImage,
         shape: circular ? BoxShape.circle : BoxShape.rectangle,
-        borderRadius: circular ? null : _buildBorderRadius(),
+        borderRadius: borderRadiusValue,
         border: border,
         boxShadow: boxShadow,
       ),
@@ -195,134 +221,70 @@ class AppContainer extends StatelessWidget {
     return current;
   }
 
-  /// 应用外边距，按Android MarginLayoutParams的优先级逻辑
-  EdgeInsetsGeometry? _applyMargin() {
-    // 最高优先级：margin（同时设置四个方向）
-    if (margin != null) {
-      return EdgeInsets.all(margin!);
-    }
+  /// 应用外边距，优先级：margin > horizontal/vertical > 具体方向
+  EdgeInsetsGeometry? _applyMargin() => _buildEdgeInsets(
+        all: margin,
+        horizontal: marginHorizontal,
+        vertical: marginVertical,
+        left: marginLeft,
+        right: marginRight,
+        top: marginTop,
+        bottom: marginBottom,
+        start: marginStart,
+        end: marginEnd,
+      );
 
-    // 第二优先级：horizontalMargin 和 verticalMargin
-    double? effectiveLeftMargin;
-    double? effectiveRightMargin;
-    double? effectiveTopMargin;
-    double? effectiveBottomMargin;
+  /// 应用内边距，优先级：padding > horizontal/vertical > 具体方向
+  EdgeInsetsGeometry? _applyPadding() => _buildEdgeInsets(
+        all: padding,
+        horizontal: paddingHorizontal,
+        vertical: paddingVertical,
+        left: paddingLeft,
+        right: paddingRight,
+        top: paddingTop,
+        bottom: paddingBottom,
+        start: paddingStart,
+        end: paddingEnd,
+      );
 
-    // 处理水平方向的margin
-    if (marginHorizontal != null) {
-      effectiveLeftMargin = marginHorizontal;
-      effectiveRightMargin = marginHorizontal;
-    } else {
-      effectiveLeftMargin = marginLeft;
-      effectiveRightMargin = marginRight;
-    }
-
-    // 处理垂直方向的margin
-    if (marginVertical != null) {
-      effectiveTopMargin = marginVertical;
-      effectiveBottomMargin = marginVertical;
-    } else {
-      effectiveTopMargin = marginTop;
-      effectiveBottomMargin = marginBottom;
-    }
-
-    // 检查是否有任何margin需要应用
-    bool hasMargin = effectiveLeftMargin != null ||
-        effectiveRightMargin != null ||
-        effectiveTopMargin != null ||
-        effectiveBottomMargin != null ||
-        marginStart != null ||
-        marginEnd != null;
-
-    if (!hasMargin) {
-      return null;
-    }
-
-    // 判断使用哪种EdgeInsets类型
-    bool useDirectional = marginStart != null || marginEnd != null;
-    bool hasLeftRightMargin =
-        effectiveLeftMargin != null || effectiveRightMargin != null;
-
-    // 如果设置了start/end margin，或者单独设置了left/right margin，使用EdgeInsetsDirectional
-    if (useDirectional || hasLeftRightMargin) {
+  /// 按优先级构建 EdgeInsets：all > horizontal/vertical > 各方向；支持 start/end 用 EdgeInsetsDirectional
+  static EdgeInsetsGeometry? _buildEdgeInsets({
+    double? all,
+    double? horizontal,
+    double? vertical,
+    double? left,
+    double? right,
+    double? top,
+    double? bottom,
+    double? start,
+    double? end,
+  }) {
+    if (all != null) return EdgeInsets.all(all);
+    final effectiveLeft = horizontal ?? left;
+    final effectiveRight = horizontal ?? right;
+    final effectiveTop = vertical ?? top;
+    final effectiveBottom = vertical ?? bottom;
+    final hasAny = effectiveLeft != null ||
+        effectiveRight != null ||
+        effectiveTop != null ||
+        effectiveBottom != null ||
+        start != null ||
+        end != null;
+    if (!hasAny) return null;
+    final useDirectional = start != null || end != null;
+    final hasLeftRight = effectiveLeft != null || effectiveRight != null;
+    if (useDirectional || hasLeftRight) {
       return EdgeInsetsDirectional.only(
-        start: marginStart ?? effectiveLeftMargin ?? 0,
-        end: marginEnd ?? effectiveRightMargin ?? 0,
-        top: effectiveTopMargin ?? 0,
-        bottom: effectiveBottomMargin ?? 0,
-      );
-    } else {
-      // 如果只设置了top/bottom margin，使用EdgeInsets
-      return EdgeInsets.only(
-        top: effectiveTopMargin ?? 0,
-        bottom: effectiveBottomMargin ?? 0,
+        start: start ?? effectiveLeft ?? 0,
+        end: end ?? effectiveRight ?? 0,
+        top: effectiveTop ?? 0,
+        bottom: effectiveBottom ?? 0,
       );
     }
-  }
-
-  /// 应用内边距，按Android MarginLayoutParams的优先级逻辑
-  EdgeInsetsGeometry? _applyPadding() {
-    // 最高优先级：padding（同时设置四个方向）
-    if (padding != null) {
-      return EdgeInsets.all(padding!);
-    }
-
-    // 第二优先级：horizontalPadding 和 verticalPadding
-    double? effectiveLeftPadding;
-    double? effectiveRightPadding;
-    double? effectiveTopPadding;
-    double? effectiveBottomPadding;
-
-    // 处理水平方向的padding
-    if (paddingHorizontal != null) {
-      effectiveLeftPadding = paddingHorizontal;
-      effectiveRightPadding = paddingHorizontal;
-    } else {
-      effectiveLeftPadding = paddingLeft;
-      effectiveRightPadding = paddingRight;
-    }
-
-    // 处理垂直方向的padding
-    if (paddingVertical != null) {
-      effectiveTopPadding = paddingVertical;
-      effectiveBottomPadding = paddingVertical;
-    } else {
-      effectiveTopPadding = paddingTop;
-      effectiveBottomPadding = paddingBottom;
-    }
-
-    // 检查是否有任何padding需要应用
-    bool hasPadding = effectiveLeftPadding != null ||
-        effectiveRightPadding != null ||
-        effectiveTopPadding != null ||
-        effectiveBottomPadding != null ||
-        paddingStart != null ||
-        paddingEnd != null;
-
-    if (!hasPadding) {
-      return null;
-    }
-
-    // 判断使用哪种EdgeInsets类型
-    bool useDirectional = paddingStart != null || paddingEnd != null;
-    bool hasLeftRightPadding =
-        effectiveLeftPadding != null || effectiveRightPadding != null;
-
-    // 如果设置了start/end padding，或者单独设置了left/right padding，使用EdgeInsetsDirectional
-    if (useDirectional || hasLeftRightPadding) {
-      return EdgeInsetsDirectional.only(
-        start: paddingStart ?? effectiveLeftPadding ?? 0,
-        end: paddingEnd ?? effectiveRightPadding ?? 0,
-        top: effectiveTopPadding ?? 0,
-        bottom: effectiveBottomPadding ?? 0,
-      );
-    } else {
-      // 如果只设置了top/bottom padding，使用EdgeInsets
-      return EdgeInsets.only(
-        top: effectiveTopPadding ?? 0,
-        bottom: effectiveBottomPadding ?? 0,
-      );
-    }
+    return EdgeInsets.only(
+      top: effectiveTop ?? 0,
+      bottom: effectiveBottom ?? 0,
+    );
   }
 
   /// 构建对齐方式
@@ -343,10 +305,19 @@ class AppContainer extends StatelessWidget {
 
   /// 构建圆角设置
   BorderRadiusGeometry? _buildBorderRadius() {
-    // 优先级：borderRadius > radius > 无圆角
+    // 优先级：borderRadius > topRadius/bottomRadius > radius > 无圆角
     if (borderRadius != null) {
       return borderRadius;
-    } else if (radius != null) {
+    }
+    if (topRadius != null || bottomRadius != null) {
+      return BorderRadius.only(
+        topLeft: Radius.circular(topRadius ?? 0),
+        topRight: Radius.circular(topRadius ?? 0),
+        bottomLeft: Radius.circular(bottomRadius ?? 0),
+        bottomRight: Radius.circular(bottomRadius ?? 0),
+      );
+    }
+    if (radius != null) {
       return BorderRadius.circular(radius!);
     }
     return null;
@@ -420,20 +391,23 @@ class AppContainer extends StatelessWidget {
 
     if (child is Text || child is AppText || child is RichText) {
       final actualWidth = size ?? width;
-      return Padding(
-        padding: textPadding ??
-            EdgeInsets.symmetric(
-              horizontal: (actualWidth != null &&
-                      !actualWidth.isInfinite &&
-                      !actualWidth.isNaN)
-                  ? (actualWidth * 0.1)
-                  : (5 * widthScaleFactor),
-            ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: alignment ?? Alignment.center,
-          child: result,
-        ),
+      final padding = textPadding ??
+          EdgeInsets.symmetric(
+            horizontal: (actualWidth != null &&
+                    !actualWidth.isInfinite &&
+                    !actualWidth.isNaN)
+                ? (actualWidth * 0.1)
+                : (5 * widthScaleFactor),
+          );
+      result = Padding(
+        padding: padding,
+        child: useFittedBox
+            ? FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: alignment ?? Alignment.center,
+                child: result,
+              )
+            : result,
       );
     }
 

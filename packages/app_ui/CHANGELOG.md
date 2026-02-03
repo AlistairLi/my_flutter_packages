@@ -93,3 +93,7 @@
 ## 1.2.3
 
 - Add animation component.
+
+## 1.2.4
+
+- Fix bug.

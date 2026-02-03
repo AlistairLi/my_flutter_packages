@@ -151,14 +151,14 @@ class AppText extends StatelessWidget {
       );
     }
 
-    // 处理外边距设置
-    if (enableMargin) {
-      current = _applyMargin(current);
-    }
-
-    // 处理内边距设置
+    // 处理内边距设置（先 padding 再 margin，保证 margin 在最外层）
     if (enablePadding) {
       current = _applyPadding(current);
+    }
+
+    // 处理外边距设置（若有 margin 参数则默认启用）
+    if (enableMargin || _hasAnyMargin()) {
+      current = _applyMargin(current);
     }
 
     // 处理弹性布局
@@ -175,149 +175,87 @@ class AppText extends StatelessWidget {
 
   /// 应用外边距，按Android MarginLayoutParams的优先级逻辑
   Widget _applyMargin(Widget child) {
-    // 最高优先级：margin（同时设置四个方向）
-    if (margin != null) {
-      return Container(
-        margin: EdgeInsets.all(margin!),
-        child: child,
-      );
-    }
+    final insets = _buildEdgeInsets(
+      all: margin,
+      horizontal: marginHorizontal,
+      vertical: marginVertical,
+      left: marginLeft,
+      right: marginRight,
+      top: marginTop,
+      bottom: marginBottom,
+      start: marginStart,
+      end: marginEnd,
+    );
+    if (insets == null) return child;
+    return Container(margin: insets, child: child);
+  }
 
-    // 第二优先级：horizontalMargin 和 verticalMargin
-    double? effectiveLeftMargin;
-    double? effectiveRightMargin;
-    double? effectiveTopMargin;
-    double? effectiveBottomMargin;
-
-    // 处理水平方向的margin
-    if (marginHorizontal != null) {
-      effectiveLeftMargin = marginHorizontal;
-      effectiveRightMargin = marginHorizontal;
-    } else {
-      effectiveLeftMargin = marginLeft;
-      effectiveRightMargin = marginRight;
-    }
-
-    // 处理垂直方向的margin
-    if (marginVertical != null) {
-      effectiveTopMargin = marginVertical;
-      effectiveBottomMargin = marginVertical;
-    } else {
-      effectiveTopMargin = marginTop;
-      effectiveBottomMargin = marginBottom;
-    }
-
-    // 检查是否有任何margin需要应用
-    bool hasMargin = effectiveLeftMargin != null ||
-        effectiveRightMargin != null ||
-        effectiveTopMargin != null ||
-        effectiveBottomMargin != null ||
+  bool _hasAnyMargin() {
+    return margin != null ||
+        marginHorizontal != null ||
+        marginVertical != null ||
+        marginLeft != null ||
+        marginTop != null ||
+        marginRight != null ||
+        marginBottom != null ||
         marginStart != null ||
         marginEnd != null;
-
-    if (!hasMargin) {
-      return child;
-    }
-
-    // 判断使用哪种EdgeInsets类型
-    bool useDirectional = marginStart != null || marginEnd != null;
-    bool hasLeftRightMargin =
-        effectiveLeftMargin != null || effectiveRightMargin != null;
-
-    // 如果设置了start/end margin，或者单独设置了left/right margin，使用EdgeInsetsDirectional
-    if (useDirectional || hasLeftRightMargin) {
-      return Container(
-        margin: EdgeInsetsDirectional.only(
-          start: marginStart ?? effectiveLeftMargin ?? 0,
-          end: marginEnd ?? effectiveRightMargin ?? 0,
-          top: effectiveTopMargin ?? 0,
-          bottom: effectiveBottomMargin ?? 0,
-        ),
-        child: child,
-      );
-    } else {
-      // 如果只设置了top/bottom margin，使用EdgeInsets
-      return Container(
-        margin: EdgeInsets.only(
-          top: effectiveTopMargin ?? 0,
-          bottom: effectiveBottomMargin ?? 0,
-        ),
-        child: child,
-      );
-    }
   }
 
   /// 应用内边距，按Android MarginLayoutParams的优先级逻辑
   Widget _applyPadding(Widget child) {
-    // 最高优先级：padding（同时设置四个方向）
-    if (padding != null) {
-      return Padding(
-        padding: EdgeInsets.all(padding!),
-        child: child,
+    final insets = _buildEdgeInsets(
+      all: padding,
+      horizontal: paddingHorizontal,
+      vertical: paddingVertical,
+      left: paddingLeft,
+      right: paddingRight,
+      top: paddingTop,
+      bottom: paddingBottom,
+      start: paddingStart,
+      end: paddingEnd,
+    );
+    if (insets == null) return child;
+    return Padding(padding: insets, child: child);
+  }
+
+  /// 按优先级构建 EdgeInsets：all > horizontal/vertical > 各方向；支持 start/end 用 EdgeInsetsDirectional
+  static EdgeInsetsGeometry? _buildEdgeInsets({
+    double? all,
+    double? horizontal,
+    double? vertical,
+    double? left,
+    double? right,
+    double? top,
+    double? bottom,
+    double? start,
+    double? end,
+  }) {
+    if (all != null) return EdgeInsets.all(all);
+    final effectiveLeft = horizontal ?? left;
+    final effectiveRight = horizontal ?? right;
+    final effectiveTop = vertical ?? top;
+    final effectiveBottom = vertical ?? bottom;
+    final hasAny = effectiveLeft != null ||
+        effectiveRight != null ||
+        effectiveTop != null ||
+        effectiveBottom != null ||
+        start != null ||
+        end != null;
+    if (!hasAny) return null;
+    final useDirectional = start != null || end != null;
+    final hasLeftRight = effectiveLeft != null || effectiveRight != null;
+    if (useDirectional || hasLeftRight) {
+      return EdgeInsetsDirectional.only(
+        start: start ?? effectiveLeft ?? 0,
+        end: end ?? effectiveRight ?? 0,
+        top: effectiveTop ?? 0,
+        bottom: effectiveBottom ?? 0,
       );
     }
-
-    // 第二优先级：horizontalPadding 和 verticalPadding
-    double? effectiveLeftPadding;
-    double? effectiveRightPadding;
-    double? effectiveTopPadding;
-    double? effectiveBottomPadding;
-
-    // 处理水平方向的padding
-    if (paddingHorizontal != null) {
-      effectiveLeftPadding = paddingHorizontal;
-      effectiveRightPadding = paddingHorizontal;
-    } else {
-      effectiveLeftPadding = paddingLeft;
-      effectiveRightPadding = paddingRight;
-    }
-
-    // 处理垂直方向的padding
-    if (paddingVertical != null) {
-      effectiveTopPadding = paddingVertical;
-      effectiveBottomPadding = paddingVertical;
-    } else {
-      effectiveTopPadding = paddingTop;
-      effectiveBottomPadding = paddingBottom;
-    }
-
-    // 检查是否有任何padding需要应用
-    bool hasPadding = effectiveLeftPadding != null ||
-        effectiveRightPadding != null ||
-        effectiveTopPadding != null ||
-        effectiveBottomPadding != null ||
-        paddingStart != null ||
-        paddingEnd != null;
-
-    if (!hasPadding) {
-      return child;
-    }
-
-    // 判断使用哪种EdgeInsets类型
-    bool useDirectional = paddingStart != null || paddingEnd != null;
-    bool hasLeftRightPadding =
-        effectiveLeftPadding != null || effectiveRightPadding != null;
-
-    // 如果设置了start/end padding，或者单独设置了left/right padding，使用EdgeInsetsDirectional
-    if (useDirectional || hasLeftRightPadding) {
-      return Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: paddingStart ?? effectiveLeftPadding ?? 0,
-          end: paddingEnd ?? effectiveRightPadding ?? 0,
-          top: effectiveTopPadding ?? 0,
-          bottom: effectiveBottomPadding ?? 0,
-        ),
-        child: child,
-      );
-    } else {
-      // 如果只设置了top/bottom padding，使用EdgeInsets
-      return Padding(
-        padding: EdgeInsets.only(
-          top: effectiveTopPadding ?? 0,
-          bottom: effectiveBottomPadding ?? 0,
-        ),
-        child: child,
-      );
-    }
+    return EdgeInsets.only(
+      top: effectiveTop ?? 0,
+      bottom: effectiveBottom ?? 0,
+    );
   }
 }
