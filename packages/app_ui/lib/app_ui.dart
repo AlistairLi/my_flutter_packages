@@ -3,6 +3,8 @@ library;
 export 'src/animation/animated_clickable_button.dart';
 export 'src/animation/app_dialog_animations.dart';
 export 'src/animation/complex_animated_widget.dart';
+export 'src/animation/bounce_scale_animation_widget.dart';
+export 'src/animation/rotate_fade_animation_widget.dart';
 export 'src/animation/pulse_animated_widget.dart';
 export 'src/animation/scale_animation_widget.dart';
 export 'src/app_gesture_detector.dart';

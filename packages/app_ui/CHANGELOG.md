@@ -89,3 +89,7 @@
 ## 1.2.2
 
 - AppBackground add parameters.
+
+## 1.2.3
+
+- Add animation component.
