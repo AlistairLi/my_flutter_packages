@@ -89,7 +89,10 @@ class InAppAndroidPlatform extends IInAppPlatform {
     }
     await storage.updateOrderData(orderModel.orderNo, orderModel.toJson());
 
-    return verifier.verify(orderModel);
+    return verifyWithRetry(
+      verifier: verifier,
+      orderModel: orderModel,
+    );
   }
 
   @override
@@ -118,5 +121,10 @@ class InAppAndroidPlatform extends IInAppPlatform {
     if (purchaseDetails.pendingCompletePurchase) {
       await inAppPurchase.completePurchase(purchaseDetails);
     }
+  }
+
+  @override
+  String getUnavailableMessage() {
+    return IAPToastMessages.androidNotAvailable;
   }
 }

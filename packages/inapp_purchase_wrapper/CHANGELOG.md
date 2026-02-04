@@ -57,3 +57,7 @@
 ## 1.1.4
 
 - Add toast message.
+
+## 1.1.5
+
+- Prompt text modification and re-attempt of document verification.

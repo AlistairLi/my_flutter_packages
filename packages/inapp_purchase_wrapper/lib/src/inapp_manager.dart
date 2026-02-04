@@ -56,13 +56,22 @@ class InAppManager {
     required IInAppStorage inAppStorage,
     IIAPLogger? logger,
     IIAPNetworkStatusProvider? networkStatusProvider,
+    int? verifyRetryCount,
+    Duration? verifyRetryDelay,
   })  : _inAppPlatform =
             Platform.isAndroid ? InAppAndroidPlatform() : InAppIOSPlatform(),
         _paymentListener = paymentListener,
         _inAppStorage = InAppStorageWrapper(inAppStorage, logger),
         _inAppVerifier = inAppVerifier,
         _logger = logger,
-        _networkStatusProvider = networkStatusProvider;
+        _networkStatusProvider = networkStatusProvider {
+    if (verifyRetryCount != null) {
+      _inAppPlatform.verifyRetryCount = verifyRetryCount;
+    }
+    if (verifyRetryDelay != null) {
+      _inAppPlatform.verifyRetryDelay = verifyRetryDelay;
+    }
+  }
 
   /// 初始化监听内购
   void init() {
@@ -269,7 +278,7 @@ class InAppManager {
         orderNo: orderNo,
         errorMsg:
             "error: InAppPurchase.isAvailable: $available, networkStatus: ${_networkStatusProvider?.getNetworkStatus()}",
-        details: IAPToastMessages.notAvailable,
+        details: _inAppPlatform.getUnavailableMessage(),
       );
       return false;
     }

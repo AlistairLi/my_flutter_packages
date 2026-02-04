@@ -7,8 +7,10 @@ class IAPToastMessages {
       'Unable to identify the product id. Please refresh and try again.';
   static const String orderNoMissing =
       'Failed to generate the order information. Please try again.';
-  static const String notAvailable =
-      'Purchases are not available right now. Please check your store availability or try again later.';
+  static const String androidNotAvailable =
+      'In-app purchases are currently unavailable. Please make sure Google Play is available and try again.';
+  static const String iosNotAvailable =
+      "In-app purchases are currently unavailable. Please check your App Store settings and try again.";
   static const String productDetailsNull =
       'Unable to load product information. Please check your network and store account.';
   static const String launchPayFailed =
