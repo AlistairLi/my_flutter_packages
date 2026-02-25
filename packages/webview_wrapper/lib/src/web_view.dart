@@ -45,7 +45,7 @@ class _WebViewPageState extends State<WebViewPage> {
         WebViewController.fromPlatformCreationParams(params);
     webViewController
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
+      ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (NavigationRequest request) {
@@ -170,17 +170,19 @@ class _WebViewPageState extends State<WebViewPage> {
           : null,
       body: SafeArea(
         top: !_config.needAppbar,
-        bottom: false,
-        child: WebViewPlatform.instance is WebKitWebViewPlatform
-            ? WebViewWidget(
-                controller: _controller,
-              )
-            : WebViewWidget.fromPlatformCreationParams(
-                params: AndroidWebViewWidgetCreationParams(
-                  displayWithHybridComposition: true, // 开启允许使用跨平台组件
-                  controller: _controller.platform,
+        child: Container(
+          color: _config.backgroundColor,
+          child: WebViewPlatform.instance is WebKitWebViewPlatform
+              ? WebViewWidget(
+                  controller: _controller,
+                )
+              : WebViewWidget.fromPlatformCreationParams(
+                  params: AndroidWebViewWidgetCreationParams(
+                    displayWithHybridComposition: true, // 开启允许使用跨平台组件
+                    controller: _controller.platform,
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }

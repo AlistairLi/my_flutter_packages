@@ -27,6 +27,9 @@ class WebViewConfig {
   /// 用于处理各种事件（外部链接、JS事件等）
   List<BaseEventHandler>? eventHandlers;
 
+  /// WebView内容的背景颜色，默认为黑色
+  Color backgroundColor;
+
   WebViewConfig({
     required this.url,
     required this.scene,
@@ -35,6 +38,7 @@ class WebViewConfig {
     this.customEvents,
     this.eventCallbacks,
     this.eventHandlers,
+    this.backgroundColor = const Color(0xFF000000),
   });
 
   /// 获取最终的事件配置（合并全局配置和实例配置）

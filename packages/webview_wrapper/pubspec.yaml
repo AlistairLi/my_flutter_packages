@@ -1,6 +1,6 @@
 name: webview_wrapper
 description: A Flutter WebView wrapper library with enhanced features including dynamic event configuration, JavaScript communication, and external app handling.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/AlistairLi/my_flutter_packages/tree/main/packages/webview_wrapper
 
 environment:
