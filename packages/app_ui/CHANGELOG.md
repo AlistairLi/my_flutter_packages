@@ -97,3 +97,7 @@
 ## 1.2.4
 
 - Fix bug.
+
+## 1.2.5
+
+- BottomConfirmDialog add parameters.

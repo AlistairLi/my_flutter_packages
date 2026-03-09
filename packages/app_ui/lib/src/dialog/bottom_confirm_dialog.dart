@@ -5,6 +5,7 @@ class BottomConfirmDialog extends StatelessWidget {
   final String? title;
   final Widget? titleWidget;
   final String? content;
+  final Widget? contentWidget;
   final String? leftText;
   final String? rightText;
   final void Function(BuildContext context)? onLeftClose;
@@ -17,8 +18,8 @@ class BottomConfirmDialog extends StatelessWidget {
   final TextStyle? rightTextStyle;
   final Border? leftBorder;
   final Border? rightBorder;
-  final Color? leftBorderColor;
-  final Color? rightBorderColor;
+  final Color? leftBackgroundColor;
+  final Color? rightBackgroundColor;
   final Color? backgroundColor;
   final Color? dividerColor;
   final BorderRadius? borderRadius;
@@ -37,6 +38,7 @@ class BottomConfirmDialog extends StatelessWidget {
     this.title,
     this.titleWidget,
     this.content,
+    this.contentWidget,
     this.leftText = 'Cancel',
     this.rightText = 'Confirm',
     this.onLeftClose,
@@ -49,8 +51,8 @@ class BottomConfirmDialog extends StatelessWidget {
     this.rightTextStyle,
     this.leftBorder,
     this.rightBorder,
-    this.leftBorderColor,
-    this.rightBorderColor,
+    this.leftBackgroundColor,
+    this.rightBackgroundColor,
     this.backgroundColor,
     this.dividerColor,
     this.borderRadius,
@@ -63,7 +65,11 @@ class BottomConfirmDialog extends StatelessWidget {
     this.textScaleFactor = 1,
     this.titleMaxLines = 3,
     this.contentMaxLines = 20,
-  }) : assert(title != null || titleWidget != null || content != null,
+  }) : assert(
+            title != null ||
+                titleWidget != null ||
+                content != null ||
+                contentWidget != null,
             'The "title" and "content" cannot be used simultaneously.');
 
   @override
@@ -112,7 +118,8 @@ class BottomConfirmDialog extends StatelessWidget {
                     ),
                     SizedBox(height: 12 * widthScaleFactor),
                   ],
-                  if (content != null) ...[
+                  if (contentWidget != null) contentWidget!,
+                  if (contentWidget == null && content != null) ...[
                     Text(
                       content!,
                       maxLines: contentMaxLines,
@@ -135,7 +142,7 @@ class BottomConfirmDialog extends StatelessWidget {
                   child: _DialogButton(
                     height: buttonHeight ?? 48 * widthScaleFactor,
                     text: leftText ?? "",
-                    backgroundColor: leftBorderColor,
+                    backgroundColor: leftBackgroundColor,
                     border: leftBorder,
                     radius: buttonRadius,
                     onTap: () {
@@ -154,7 +161,7 @@ class BottomConfirmDialog extends StatelessWidget {
                   child: _DialogButton(
                     height: buttonHeight ?? 48 * widthScaleFactor,
                     text: rightText ?? "",
-                    backgroundColor: rightBorderColor,
+                    backgroundColor: rightBackgroundColor,
                     border: rightBorder,
                     radius: buttonRadius,
                     onTap: () {
