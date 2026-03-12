@@ -101,3 +101,7 @@
 ## 1.2.5
 
 - BottomConfirmDialog add parameters.
+
+## 1.2.6
+
+- `MultiHighlightText` component added for rich text with multiple placeholders support.
