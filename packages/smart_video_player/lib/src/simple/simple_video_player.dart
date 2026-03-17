@@ -149,7 +149,7 @@ class _SmartVideoPlayerState extends State<SimpleVideoPlayer>
       var controller = _chewieController;
       if (controller != null) {
         var value = controller.videoPlayerController.value;
-        if (value.isInitialized == true && value.isPlaying == true) {
+        if (value.isInitialized == true && value.isPlaying != true) {
           // 设置音频输出
           final AudioSession session = await AudioSession.instance;
           await session.configure(const AudioSessionConfiguration.music());

@@ -80,4 +80,9 @@
 - Added LocalVideoServer for streaming video data from memory.
 
 ## 1.2.1
+
 - Set volume.
+
+## 1.2.2
+
+- Fix the bug of `SimpleVideoPlayer`.
