@@ -17,6 +17,10 @@ class FirebaseInitializer {
         if (kDebugMode) {
           FlutterError.dumpErrorToConsole(errorDetails);
         } else {
+          if (_shouldIgnoreFatalFlutterError(errorDetails)) {
+            return;
+          }
+
           if (fatalError) {
             FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
           } else {
@@ -30,6 +34,10 @@ class FirebaseInitializer {
             FlutterErrorDetails(exception: error, stack: stack),
           );
         } else {
+          if (_isIgnorableImageLoadException(error, stack)) {
+            return true;
+          }
+
           if (fatalError) {
             FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
           } else {
@@ -45,4 +53,32 @@ class FirebaseInitializer {
       }
     }
   }
+
+  static bool _isIgnorableImageLoadException(Object error, [StackTrace? stackTrace]) {
+    final errorText = error.toString().toLowerCase();
+    final stackText = stackTrace?.toString().toLowerCase() ?? '';
+    final isConnectionClosed =
+    errorText.contains('connection closed while receiving data');
+    final isHttpException = errorText.contains('httpexception');
+    // final isImageRequest = RegExp(
+    //   r'uri\s*=\s*https?:\/\/\S+\.(png|jpg|jpeg|webp|gif|bmp|svg)(\?|$)',
+    //   caseSensitive: false,
+    // ).hasMatch(error.toString());
+    final isImageStack = stackText.contains('cached_network_image') ||
+        stackText.contains('octo_image') ||
+        stackText.contains('flutter_cache_manager') ||
+        stackText.contains('image_provider');
+
+    // return isConnectionClosed &&
+    //     (isHttpException || isImageRequest || isImageStack);
+    return isConnectionClosed && (isHttpException || isImageStack);
+  }
+
+  static bool _shouldIgnoreFatalFlutterError(FlutterErrorDetails errorDetails) {
+    return _isIgnorableImageLoadException(
+      errorDetails.exception,
+      errorDetails.stack,
+    );
+  }
+
 }

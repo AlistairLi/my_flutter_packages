@@ -1,6 +1,6 @@
 name: firebase_bootstrap
 description: A lightweight package for initializing Firebase services in Flutter apps with minimal setup.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/firebase_bootstrap/
 
 environment:
