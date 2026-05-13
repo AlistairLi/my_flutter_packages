@@ -1,4 +1,4 @@
-import 'package:firebase_bootstrap/firebase_bootstrap.dart';
+import 'package:firebase_bootstrap_plus/firebase_bootstrap.dart';
 import 'package:flutter/cupertino.dart';
 
 void main() async {

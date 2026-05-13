@@ -6,10 +6,11 @@ import 'package:flutter/foundation.dart';
 class FirebaseInitializer {
   FirebaseInitializer._();
 
-  static Future<void> initFireBase() async {
+  static Future<void> initFireBase({bool? enableCrashlytics}) async {
     try {
       await Firebase.initializeApp();
-      FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
+      FirebaseCrashlytics.instance
+          .setCrashlyticsCollectionEnabled(enableCrashlytics ?? !kDebugMode);
 
       const fatalError = true;
 
