@@ -5,3 +5,7 @@
 ## 1.0.1
 
 - Add Parameter.
+
+## 1.0.2
+
+- Filter Error.
